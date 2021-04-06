@@ -437,17 +437,311 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 #footer-text{color:rgba(0,0,0,.6);font-size:.9em}}
 @media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
 </style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
 <body class="article">
 <div id="header">
 <h1>math, an integer-only functional programming language</h1>
 </div>
 <div id="content">
+<div class="sect1">
+<h2 id="_syntax">Syntax</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The syntax is really easy; almost everything is an expression except two things: variable and function definitions.
+Before we dive into the expression part let&#8217;s look at the general structure of variable and function definitions.</p>
+</div>
+<div class="sect2">
+<h3 id="_variables_and_functions">Variables and functions</h3>
+<div class="paragraph">
+<p>Variable definitions are structured like this</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-math" data-lang="math">let &lt;variable-name&gt; = &lt;definition&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Function definitions follow (almost) the exact same format</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-math" data-lang="math">define &lt;function-name&gt;(&lt;parameters&gt;) = &lt;definition&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s look at some examples of variable and function definitions</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-math" data-lang="math">let n = 2</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-math" data-lang="math">define f(x) = x + 1</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-math" data-lang="math">let x = 2
 
+define xplusone() = n + 1</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Note that functions can have as many parameters as you wish</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-math" data-lang="math">define f(a, b, c, d, e, f, g) = a + b + c + d + e + f + g</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You can even build complex things like a function which calculates the factorial of a number (n!)</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-math" data-lang="math">define factorial(n) = if(n &lt;= 1, 1, n * factorial(n - 1))</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_external_functions">External functions</h3>
+<div class="paragraph">
+<p>You might&#8217;ve noticed that we were using a function called "if" in the last example,
+"if" is one of the default external functions which is defined in native rust code.
+Here are all default external functions</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-math" data-lang="math"># Prints out the first argument
+print(output)
+
+# Prints out the first argument PLUS a new line
+println(output)
+
+# Returns the second argument if the first argument is 1 otherwise the third argument
+if(condition, true, false)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><em>In the near future you&#8217;ll be able to implement your own external functions.</em></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_expressions">Expressions</h3>
+<div class="paragraph">
+<p>As mentioned before, almost everything in this language is an expression.
+All available expressions are</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-math" data-lang="math"># Direct number value
+0
+
+# Retrieve value of variable x
+x
+
+# Add x and y together
+x + y
+
+# Subtract y from x
+x - y
+
+# Multiply x by y
+x * y
+
+# Divide x by y
+x / y
+
+# Check if x and y are equal (1 if both are equal, 0 if not)
+x == y
+
+# Check if x and y aren't equal (0 if both are equal, 1 if not)
+x =! y
+
+# Check if x is bigger than y or equals (1 if x is equal or bigger, 0 if not)
+x &gt;= y
+
+# Check if x is bigger than y (1 if x is bigger, 0 if not)
+x &gt; y
+
+# Check if x is smaller than y or equals (1 if x is smaller or equals, 0 if not)
+x &lt;= y
+
+# Check if x is smaller than y (1 if x is smaller, 0 if not)
+x &lt; y
+
+# Assign n to x (gives back n)
+x = n</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Expressions can be embraced with parenthesis to run the expression in them and ignore precedence</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-math" data-lang="math">(expression)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>An example of this is</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-math" data-lang="math">(1 + 2) * 3</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_where_part_in_a_variable_definition">Where part in a variable definition</h3>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>This feature is currently unavailable</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>After the definition of a variable there can be a "where part", the general structure of a where part looks like this</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-math" data-lang="math">where &lt;var-name&gt; = &lt;definition&gt;, ...</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>where parts are for when you don&#8217;t want to repeat yourself in a variable definition. For example</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-math" data-lang="math">define f(x) = ...
+let a = ...
+
+let n = (f(a) + 3) * (f(a) + 2) + f(a)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>this looks really messy because of all the f(x) invocations, using the where part we can make it look much more clean:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-math" data-lang="math">define f(x) = ...
+let a = ...
+
+let n = (r + 3) * (r + 2) + r where r = f(a)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>these variables that are only available in that specific variable definition where we define them in the where part are called "part variables".
+We can even have multiple part variables in one where part:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-math" data-lang="math">define f(x) = ...
+define g(x) = ...
+let a = ...
+
+let n = (rf + 3) * (rg + 2) + rf where rf = f(a), rg = g(a)</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_new_lines_and_the_pipe_operator">New lines and the pipe (|) operator</h3>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>This feature is still under development and can cause crashes</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>If you want to continue an expression in a new line you can use the pipe (|) operator</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-math" data-lang="math">let a = |
+		2 + |
+	2</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You can write as many pipe operators as you wish on one line (they each count for a new line)</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-math" data-lang="math">let a = ||||
+
+
+
+	0</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>is the same as</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-math" data-lang="math">let a = 0</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>or</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-math" data-lang="math">let a = |
+0</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_comments">Comments</h3>
+<div class="paragraph">
+<p>Commenting code can be done by putting a # at the start of a line</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-math" data-lang="math"># This is a comment</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_current_issues">Current issues</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p>Negative numbers don&#8217;t work (the reason to this is probably that we store all numbers as usize)</p>
+</li>
+<li>
+<p>The lexer is really slow</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2021-04-06 16:44:47 +0200
+Last updated 2021-04-06 17:59:08 +0200
 </div>
 </div>
 </body>
