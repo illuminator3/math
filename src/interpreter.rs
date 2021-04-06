@@ -1,5 +1,7 @@
 use crate::ast::{AST, Expression, MathType, Function, Variable};
 use std::env::var;
+use num_bigint::BigInt;
+use std::ops::{Add, Sub, Mul, Div};
 
 pub fn interpret(ast: AST, external_functions: Vec<ExternalRuntimeFunction>) {
     let exprs = ast.loose_expressions.clone().into_iter().map(RuntimeExpression::from).collect::<Vec<RuntimeExpression>>();
@@ -26,7 +28,7 @@ impl RuntimeAST {
         }
     }
 
-    pub fn function_ast(orig: RuntimeAST, func: RuntimeFunction, args: Vec<isize>) -> Self {
+    pub fn function_ast(orig: RuntimeAST, func: RuntimeFunction, args: Vec<BigInt>) -> Self {
         let mut vars = orig.variables.into_iter().filter(|v| !v.function_argument).collect::<Vec<RuntimeVariable>>().clone();
         let mut ptr = 0;
 
@@ -35,7 +37,7 @@ impl RuntimeAST {
                 name: param,
                 definition: RuntimeExpression {
                     orig: Expression::NumberValue {
-                        value: *args.get(ptr).unwrap()
+                        value: args.get(ptr).unwrap().clone()
                     }
                 },
                 function_argument: true
@@ -87,9 +89,9 @@ impl RuntimeAST {
         self.external_functions.clone().into_iter().find(|f| f.name.eq(name) && f.parameters == params).is_some()
     }
 
-    pub fn invoke_function(&self, name: &str, args: Vec<RuntimeExpression>, ast: RuntimeAST) -> isize {
+    pub fn invoke_function(&self, name: &str, args: Vec<RuntimeExpression>, ast: RuntimeAST) -> BigInt {
         return if self.function_exists(name, args.len()) {
-            self.lookup_function(name, args.len()).invoke(args.into_iter().map(|expr| expr.execute(ast.clone())).collect::<Vec<isize>>(), ast.clone())
+            self.lookup_function(name, args.len()).invoke(args.into_iter().map(|expr| expr.execute(ast.clone())).collect::<Vec<BigInt>>(), ast.clone())
         } else if self.external_function_exists(name, args.len()) {
             (self.lookup_external_function(name, args.len()).invoke)(args, ast.clone())
         } else {
@@ -97,12 +99,12 @@ impl RuntimeAST {
         }
     }
 
-    pub fn reassign_variable(&mut self, var: RuntimeVariable, val: isize) -> isize {
+    pub fn reassign_variable(&mut self, var: RuntimeVariable, val: BigInt) -> BigInt {
         let name = var.name;
 
         self.variables.iter_mut().find(|v| v.name.eq(&name)).unwrap().definition = RuntimeExpression {
             orig: Expression::NumberValue {
-                value: val
+                value: val.clone()
             }
         };
 
@@ -114,11 +116,11 @@ impl RuntimeAST {
 pub struct ExternalRuntimeFunction {
     name: String,
     parameters: usize,
-    invoke: fn(Vec<RuntimeExpression>, RuntimeAST) -> isize
+    invoke: fn(Vec<RuntimeExpression>, RuntimeAST) -> BigInt
 }
 
 impl ExternalRuntimeFunction {
-    pub fn create(name: &'static str, parameters: usize, invoke: fn(Vec<RuntimeExpression>, RuntimeAST) -> isize) -> ExternalRuntimeFunction {
+    pub fn create(name: &'static str, parameters: usize, invoke: fn(Vec<RuntimeExpression>, RuntimeAST) -> BigInt) -> ExternalRuntimeFunction {
         ExternalRuntimeFunction {
             name: name.to_owned(),
             parameters,
@@ -134,7 +136,7 @@ impl ExternalRuntimeFunction {
         &self.parameters
     }
 
-    pub fn invoke(&self) -> &fn(Vec<RuntimeExpression>, RuntimeAST) -> isize {
+    pub fn invoke(&self) -> &fn(Vec<RuntimeExpression>, RuntimeAST) -> BigInt {
         &self.invoke
     }
 }
@@ -155,7 +157,7 @@ impl RuntimeVariable {
         }
     }
 
-    pub fn get_value(&self, ast: RuntimeAST) -> isize {
+    pub fn get_value(&self, ast: RuntimeAST) -> BigInt {
         self.definition.execute(ast)
     }
 }
@@ -176,7 +178,7 @@ impl RuntimeFunction {
         }
     }
 
-    pub fn invoke(&self, args: Vec<isize>, ast: RuntimeAST) -> isize {
+    pub fn invoke(&self, args: Vec<BigInt>, ast: RuntimeAST) -> BigInt {
         self.definition.execute(RuntimeAST::function_ast(ast.clone(), self.clone(), args))
     }
 }
@@ -197,15 +199,15 @@ impl RuntimeExpression {
         &self.orig
     }
 
-    pub fn execute(&self, ast: RuntimeAST) -> isize {
+    pub fn execute(&self, ast: RuntimeAST) -> BigInt {
         RuntimeExpression::execute_expr(&self.orig, ast)
     }
 
-    pub fn execute_expr(expr: &Expression, mut ast: RuntimeAST) -> isize {
+    pub fn execute_expr(expr: &Expression, mut ast: RuntimeAST) -> BigInt {
         // println!("execute_expr {:?}", RuntimeExpression::expr_to_string(&expr));
 
         match expr {
-            Expression::NumberValue { value } => *value,
+            Expression::NumberValue { value } => value.clone(),
             Expression::VariableAccess { variable } => ast.lookup_variable(&variable.to_owned()).get_value(ast),
             Expression::Math { var1, var2, math } => RuntimeExpression::run_math(math.clone(), RuntimeExpression::from(*var1.clone()), RuntimeExpression::from(*var2.clone()), ast),
             Expression::FunctionInvocation { function, arguments } => ast.invoke_function(&function.to_owned(), arguments.into_iter().map(|expr| RuntimeExpression::from(expr.clone())).collect::<Vec<RuntimeExpression>>(), ast.clone()),
@@ -214,18 +216,18 @@ impl RuntimeExpression {
         }
     }
 
-    pub fn run_math(math: MathType, var1: RuntimeExpression, var2: RuntimeExpression, ast: RuntimeAST) -> isize {
+    pub fn run_math(math: MathType, var1: RuntimeExpression, var2: RuntimeExpression, ast: RuntimeAST) -> BigInt {
         match math {
-            MathType::Add               => var1.execute(ast.clone()) + var2.execute(ast),
-            MathType::Subtract          => var1.execute(ast.clone()) - var2.execute(ast),
-            MathType::Multiply          => var1.execute(ast.clone()) * var2.execute(ast),
-            MathType::Divide            => var1.execute(ast.clone()) / var2.execute(ast),
-            MathType::Equals            => if var1.execute(ast.clone()) == var2.execute(ast) { 1 } else { 0 },
-            MathType::NotEquals         => if var1.execute(ast.clone()) != var2.execute(ast) { 1 } else { 0 },
-            MathType::BiggerOrEquals    => if var1.execute(ast.clone()) >= var2.execute(ast) { 1 } else { 0 },
-            MathType::Bigger            => if var1.execute(ast.clone()) > var2.execute(ast) { 1 } else { 0 },
-            MathType::SmallerOrEquals   => if var1.execute(ast.clone()) <= var2.execute(ast) { 1 } else { 0 },
-            MathType::Smaller           => if var1.execute(ast.clone()) < var2.execute(ast) { 1 } else { 0 },
+            MathType::Add               => var1.execute(ast.clone()).add(var2.execute(ast)),
+            MathType::Subtract          => var1.execute(ast.clone()).sub(var2.execute(ast)),
+            MathType::Multiply          => var1.execute(ast.clone()).mul(var2.execute(ast)),
+            MathType::Divide            => var1.execute(ast.clone()).div(var2.execute(ast)),
+            MathType::Equals            => BigInt::from(if var1.execute(ast.clone()) == var2.execute(ast) { 1 } else { 0 }),
+            MathType::NotEquals         => BigInt::from(if var1.execute(ast.clone()) != var2.execute(ast) { 1 } else { 0 }),
+            MathType::BiggerOrEquals    => BigInt::from(if var1.execute(ast.clone()) >= var2.execute(ast) { 1 } else { 0 }),
+            MathType::Bigger            => BigInt::from(if var1.execute(ast.clone()) > var2.execute(ast) { 1 } else { 0 }),
+            MathType::SmallerOrEquals   => BigInt::from(if var1.execute(ast.clone()) <= var2.execute(ast) { 1 } else { 0 }),
+            MathType::Smaller           => BigInt::from(if var1.execute(ast.clone()) < var2.execute(ast) { 1 } else { 0 }),
         }
     }
 

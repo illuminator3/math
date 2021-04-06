@@ -7,6 +7,7 @@ use std::panic::{catch_unwind, set_hook};
 use std::env;
 use std::time::{SystemTime, UNIX_EPOCH};
 use std::io::stdin;
+use num_bigint::BigInt;
 
 mod lexer;
 mod parser;
@@ -187,7 +188,7 @@ fn fake_main(file: &Path) {
             |args, ast| {
                 println!("{}", args.get(0).unwrap().execute(ast));
 
-                0
+                BigInt::from(0)
             }
         ),
         external!( // print(output)
@@ -196,7 +197,7 @@ fn fake_main(file: &Path) {
             |args, ast| {
                 print!("{}", args.get(0).unwrap().execute(ast));
 
-                0
+                BigInt::from(0)
             }
         ),
         external!( // if(condition, true, false)
@@ -205,7 +206,7 @@ fn fake_main(file: &Path) {
             |args, ast| {
                 // println!("IF {:?}", RuntimeExpression::expr_to_string(args.get(0).unwrap().orig()));
 
-                return if args.get(0).unwrap().execute(ast.clone()) == 1 {
+                return if args.get(0).unwrap().execute(ast.clone()) == BigInt::from(1) {
                     // println!("true");
 
                     args.get(1).unwrap().execute(ast)
@@ -230,7 +231,7 @@ fn fake_main(file: &Path) {
                     panic!("Input must be a number");
                 }
 
-                result.unwrap()
+                BigInt::from(result.unwrap())
             }
         )
     ];

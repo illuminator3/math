@@ -2,6 +2,7 @@ use std::collections::hash_map::Entry;
 use crate::expression_parser::PartExpression;
 use std::env::VarError::NotPresent;
 use std::process::exit;
+use num_bigint::BigInt;
 
 #[derive(Debug)]
 pub struct AST { // AST = Abstract Syntax Tree
@@ -35,7 +36,7 @@ pub enum Expression {
         arguments: Vec<Expression>
     }*/,
     NumberValue {
-        value: isize
+        value: BigInt
     },
     VariableAccess {
         variable: String
@@ -60,7 +61,7 @@ impl Clone for Expression {
         match self {
             Expression::None => Expression::None,
             Expression::External => Expression::External,
-            Expression::NumberValue { value } => Expression::NumberValue { value: *value },
+            Expression::NumberValue { value } => Expression::NumberValue { value: value.clone() },
             Expression::VariableAccess { variable } => Expression::VariableAccess { variable: variable.to_owned() },
             Expression::Math { var1, var2, math } => Expression::Math { var1: var1.to_owned(), var2: var2.to_owned(), math: math.clone() },
             Expression::FunctionInvocation { function, arguments } => Expression::FunctionInvocation { function: function.to_owned(), arguments: arguments.clone() },

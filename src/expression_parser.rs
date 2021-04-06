@@ -5,6 +5,7 @@ use std::collections::HashMap;
 use std::any::Any;
 use std::fmt::{Debug, Formatter};
 use crate::expression_parser::Precedence::Prefix;
+use num_bigint::BigInt;
 
 pub fn parse_expression(queue: &mut TokenQueue, variables: &Vec<Variable>, functions: &Vec<Function>) -> Expression {
     actual_parse_expression(parse_expression_part(queue, Precedence::None), variables, functions)
@@ -175,7 +176,7 @@ fn prefix_parser(token: Token) -> Parser {
             },
             "NUMBER" => |queue, t| -> PartExpression {
                 PartExpression::Number {
-                    val: t.content().parse::<isize>().unwrap(),
+                    val: t.content().parse::<BigInt>().unwrap(),
                     token: t
                 }
             },
@@ -241,7 +242,7 @@ pub fn actual_parse_expression(expr: PartExpression, variables: &Vec<Variable>, 
     return match expr {
         PartExpression::Number { val, token } => {
             Expression::NumberValue {
-                value: val
+                value: BigInt::from(val)
             }
         },
         PartExpression::Identifier { val, token } => {
@@ -265,7 +266,7 @@ pub fn actual_parse_expression(expr: PartExpression, variables: &Vec<Variable>, 
                         var2: Box::new(Expression::Math {
                             var1: Box::new(expression),
                             var2: Box::new(Expression::NumberValue {
-                                value: 2
+                                value: BigInt::from(2)
                             }),
                             math: MathType::Multiply
                         }),
@@ -336,7 +337,7 @@ pub enum PartExpression {
     None, // for parsing
     Comment, // for loose expression parsing to work
     Number {
-        val: isize,
+        val: BigInt,
         token: LexedToken
     },
     Identifier {
