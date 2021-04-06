@@ -1,10 +1,3 @@
-/*
-
-- negative numbers aren't working as well
-- lexing IS REALLY REALLY slow
-
-*/
-
 use std::path::Path;
 use crate::lexer::{data, token, full_lex};
 use std::fs::{read_to_string, read};
@@ -13,6 +6,7 @@ use crate::interpreter::{interpret, ExternalRuntimeFunction, RuntimeExpression};
 use std::panic::{catch_unwind, set_hook};
 use std::env;
 use std::time::{SystemTime, UNIX_EPOCH};
+use std::io::stdin;
 
 mod lexer;
 mod parser;
@@ -220,6 +214,23 @@ fn fake_main(file: &Path) {
 
                     args.get(2).unwrap().execute(ast)
                 }
+            }
+        ),
+        external!( // input()
+            "input",
+            0,
+            |args, ast| {
+                let mut input = String::new();
+
+                stdin().read_line(&mut input).ok().expect("Failed to read line");
+
+                let result = input.replace("\n", "").parse::<isize>();
+
+                if result.is_err() {
+                    panic!("Input must be a number");
+                }
+
+                result.unwrap()
             }
         )
     ];
