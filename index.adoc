@@ -1,1 +1,210 @@
 = math, an integer-only functional programming language
+:icons: font
+
+== Syntax
+
+The syntax is really easy; almost everything is an expression except two things: variable and function definitions.
+Before we dive into the expression part let's look at the general structure of variable and function definitions.
+
+=== Variables and functions
+
+Variable definitions are structured like this
+[source,math]
+----
+let <variable-name> = <definition>
+----
+Function definitions follow (almost) the exact same format
+[source,math]
+----
+define <function-name>(<parameters>) = <definition>
+----
+
+Let's look at some examples of variable and function definitions
+[source,math]
+----
+let n = 2
+----
+[source,math]
+----
+define f(x) = x + 1
+----
+[source,math]
+----
+let x = 2
+
+define xplusone() = n + 1
+----
+
+Note that functions can have as many parameters as you wish
+[source,math]
+----
+define f(a, b, c, d, e, f, g) = a + b + c + d + e + f + g
+----
+
+You can even build complex things like a function which calculates the factorial of a number (n!)
+[source,math]
+----
+define factorial(n) = if(n <= 1, 1, n * factorial(n - 1))
+----
+
+=== External functions
+
+You might've noticed that we were using a function called "if" in the last example,
+"if" is one of the default external functions which is defined in native rust code.
+Here are all default external functions
+[source,math]
+----
+# Prints out the first argument
+print(output)
+
+# Prints out the first argument PLUS a new line
+println(output)
+
+# Returns the second argument if the first argument is 1 otherwise the third argument
+if(condition, true, false)
+----
+
+_In the near future you'll be able to implement your own external functions._
+
+=== Expressions
+
+As mentioned before, almost everything in this language is an expression.
+All available expressions are
+[source,math]
+----
+# Direct number value
+0
+
+# Retrieve value of variable x
+x
+
+# Add x and y together
+x + y
+
+# Subtract y from x
+x - y
+
+# Multiply x by y
+x * y
+
+# Divide x by y
+x / y
+
+# Check if x and y are equal (1 if both are equal, 0 if not)
+x == y
+
+# Check if x and y aren't equal (0 if both are equal, 1 if not)
+x =! y
+
+# Check if x is bigger than y or equals (1 if x is equal or bigger, 0 if not)
+x >= y
+
+# Check if x is bigger than y (1 if x is bigger, 0 if not)
+x > y
+
+# Check if x is smaller than y or equals (1 if x is smaller or equals, 0 if not)
+x <= y
+
+# Check if x is smaller than y (1 if x is smaller, 0 if not)
+x < y
+
+# Assign n to x (gives back n)
+x = n
+----
+Expressions can be embraced with parenthesis to run the expression in them and ignore precedence
+[source,math]
+----
+(expression)
+----
+An example of this is
+[source,math]
+----
+(1 + 2) * 3
+----
+
+=== Where part in a variable definition
+
+[NOTE]
+====
+This feature is currently unavailable
+====
+
+After the definition of a variable there can be a "where part", the general structure of a where part looks like this
+[source,math]
+----
+where <var-name> = <definition>, ...
+---- 
+where parts are for when you don't want to repeat yourself in a variable definition. For example
+[source,math]
+----
+define f(x) = ...
+let a = ...
+
+let n = (f(a) + 3) * (f(a) + 2) + f(a)
+----
+this looks really messy because of all the f(x) invocations, using the where part we can make it look much more clean:
+[source,math]
+----
+define f(x) = ...
+let a = ...
+
+let n = (r + 3) * (r + 2) + r where r = f(a)
+----
+these variables that are only available in that specific variable definition where we define them in the where part are called "part variables".
+We can even have multiple part variables in one where part:
+[source,math]
+----
+define f(x) = ...
+define g(x) = ...
+let a = ...
+
+let n = (rf + 3) * (rg + 2) + rf where rf = f(a), rg = g(a)
+----
+
+=== New lines and the pipe (|) operator
+
+[NOTE]
+====
+This feature is still under development and can cause crashes
+====
+
+If you want to continue an expression in a new line you can use the pipe (|) operator
+[source,math]
+----
+let a = |
+		2 + |
+	2
+----
+You can write as many pipe operators as you wish on one line (they each count for a new line)
+[source,math]
+----
+let a = ||||
+
+
+
+	0
+----
+is the same as
+[source,math]
+----
+let a = 0
+----
+or
+[source,math]
+----
+let a = |
+0
+----
+
+=== Comments
+
+Commenting code can be done by putting a # at the start of a line
+[source,math]
+----
+# This is a comment
+----
+
+== Current issues
+
+* Negative numbers don't work (the reason to this is probably that we store all numbers as usize)
+* The lexer is really slow
