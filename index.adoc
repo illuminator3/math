@@ -62,6 +62,9 @@ println(output)
 
 # Returns the second argument if the first argument is 1 otherwise the third argument
 if(condition, true, false)
+
+# Reads a number from stdin (console)
+input()
 ----
 
 _In the near future you'll be able to implement your own external functions._
