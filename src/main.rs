@@ -224,7 +224,7 @@ fn fake_main(file: &Path) {
 
                 stdin().read_line(&mut input).ok().expect("Failed to read line");
 
-                let result = input.replace("\n", "").parse::<isize>();
+                let result = input.replace("\r\n", "").replace("\n", "").parse::<isize>();
 
                 if result.is_err() {
                     panic!("Input must be a number");
