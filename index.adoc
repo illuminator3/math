@@ -208,3 +208,11 @@ Commenting code can be done by putting a # at the start of a line
 
 * Negative numbers don't work (the reason to this is probably that we store all numbers as usize)
 * The lexer is really slow
+
+== Comming soon
+
+* Pointers
+* Compiling
+* Caching
+* Defining external functions
+* Libraries (global modifier)
