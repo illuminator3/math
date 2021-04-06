@@ -51,6 +51,22 @@ impl RuntimeAST {
         }
     }
 
+    pub fn get_functions(&self) -> &Vec<RuntimeFunction> {
+        &self.functions
+    }
+
+    pub fn get_variables(&self) -> &Vec<RuntimeVariable> {
+        &self.variables
+    }
+
+    pub fn delete_function(&mut self, name: &str, params: usize) {
+        self.functions.retain(|f| f.name.ne(name) && f.parameters.len() != params);
+    }
+
+    pub fn delete_variable(&mut self, name: &str) {
+        self.variables.retain(|v| v.name.ne(name));
+    }
+
     pub fn lookup_variable(&self, name: &str) -> RuntimeVariable {
         self.variables.clone().into_iter().find(|v| v.name.eq(name)).unwrap()
     }
