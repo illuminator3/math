@@ -175,7 +175,7 @@ fn prefix_parser(token: Token) -> Parser {
             },
             "NUMBER" => |queue, t| -> PartExpression {
                 PartExpression::Number {
-                    val: t.content().parse::<usize>().unwrap(),
+                    val: t.content().parse::<isize>().unwrap(),
                     token: t
                 }
             },
@@ -258,22 +258,22 @@ pub fn actual_parse_expression(expr: PartExpression, variables: &Vec<Variable>, 
                 "-" => {
                     let expression = actual_parse_expression(*expression.clone(), &variables.clone(), &functions.clone());
 
-                    match expression {
-                        Expression::NumberValue { .. } => {
-                            Expression::Math {
-                                var1: Box::new(expression.clone()),
-                                var2: Box::new(Expression::Math {
-                                    var1: Box::new(expression),
-                                    var2: Box::new(Expression::NumberValue {
-                                        value: 2
-                                    }),
-                                    math: MathType::Multiply
-                                }),
-                                math: MathType::Subtract
-                            }
-                        }
-                        _ => token.err(&format!("Can't apply {} prefix to this", prefix))
+                    // match expression {
+                    //     Expression::NumberValue { .. } => {
+                    Expression::Math {
+                        var1: Box::new(expression.clone()),
+                        var2: Box::new(Expression::Math {
+                            var1: Box::new(expression),
+                            var2: Box::new(Expression::NumberValue {
+                                value: 2
+                            }),
+                            math: MathType::Multiply
+                        }),
+                        math: MathType::Subtract
                     }
+                        // }
+                        // _ => token.err(&format!("Can't apply {} prefix to this", prefix))
+                    // }
                 }
                 _ => token.err("Unknown prefix")
             }
@@ -336,7 +336,7 @@ pub enum PartExpression {
     None, // for parsing
     Comment, // for loose expression parsing to work
     Number {
-        val: usize,
+        val: isize,
         token: LexedToken
     },
     Identifier {

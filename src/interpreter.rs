@@ -26,7 +26,7 @@ impl RuntimeAST {
         }
     }
 
-    pub fn function_ast(orig: RuntimeAST, func: RuntimeFunction, args: Vec<usize>) -> Self {
+    pub fn function_ast(orig: RuntimeAST, func: RuntimeFunction, args: Vec<isize>) -> Self {
         let mut vars = orig.variables.into_iter().filter(|v| !v.function_argument).collect::<Vec<RuntimeVariable>>().clone();
         let mut ptr = 0;
 
@@ -71,9 +71,9 @@ impl RuntimeAST {
         self.external_functions.clone().into_iter().find(|f| f.name.eq(name) && f.parameters == params).is_some()
     }
 
-    pub fn invoke_function(&self, name: &str, args: Vec<RuntimeExpression>, ast: RuntimeAST) -> usize {
+    pub fn invoke_function(&self, name: &str, args: Vec<RuntimeExpression>, ast: RuntimeAST) -> isize {
         return if self.function_exists(name, args.len()) {
-            self.lookup_function(name, args.len()).invoke(args.into_iter().map(|expr| expr.execute(ast.clone())).collect::<Vec<usize>>(), ast.clone())
+            self.lookup_function(name, args.len()).invoke(args.into_iter().map(|expr| expr.execute(ast.clone())).collect::<Vec<isize>>(), ast.clone())
         } else if self.external_function_exists(name, args.len()) {
             (self.lookup_external_function(name, args.len()).invoke)(args, ast.clone())
         } else {
@@ -81,7 +81,7 @@ impl RuntimeAST {
         }
     }
 
-    pub fn reassign_variable(&mut self, var: RuntimeVariable, val: usize) -> usize {
+    pub fn reassign_variable(&mut self, var: RuntimeVariable, val: isize) -> isize {
         let name = var.name;
 
         self.variables.iter_mut().find(|v| v.name.eq(&name)).unwrap().definition = RuntimeExpression {
@@ -98,11 +98,11 @@ impl RuntimeAST {
 pub struct ExternalRuntimeFunction {
     name: String,
     parameters: usize,
-    invoke: fn(Vec<RuntimeExpression>, RuntimeAST) -> usize
+    invoke: fn(Vec<RuntimeExpression>, RuntimeAST) -> isize
 }
 
 impl ExternalRuntimeFunction {
-    pub fn create(name: &'static str, parameters: usize, invoke: fn(Vec<RuntimeExpression>, RuntimeAST) -> usize) -> ExternalRuntimeFunction {
+    pub fn create(name: &'static str, parameters: usize, invoke: fn(Vec<RuntimeExpression>, RuntimeAST) -> isize) -> ExternalRuntimeFunction {
         ExternalRuntimeFunction {
             name: name.to_owned(),
             parameters,
@@ -118,7 +118,7 @@ impl ExternalRuntimeFunction {
         &self.parameters
     }
 
-    pub fn invoke(&self) -> &fn(Vec<RuntimeExpression>, RuntimeAST) -> usize {
+    pub fn invoke(&self) -> &fn(Vec<RuntimeExpression>, RuntimeAST) -> isize {
         &self.invoke
     }
 }
@@ -139,7 +139,7 @@ impl RuntimeVariable {
         }
     }
 
-    pub fn get_value(&self, ast: RuntimeAST) -> usize {
+    pub fn get_value(&self, ast: RuntimeAST) -> isize {
         self.definition.execute(ast)
     }
 }
@@ -160,7 +160,7 @@ impl RuntimeFunction {
         }
     }
 
-    pub fn invoke(&self, args: Vec<usize>, ast: RuntimeAST) -> usize {
+    pub fn invoke(&self, args: Vec<isize>, ast: RuntimeAST) -> isize {
         self.definition.execute(RuntimeAST::function_ast(ast.clone(), self.clone(), args))
     }
 }
@@ -181,11 +181,11 @@ impl RuntimeExpression {
         &self.orig
     }
 
-    pub fn execute(&self, ast: RuntimeAST) -> usize {
+    pub fn execute(&self, ast: RuntimeAST) -> isize {
         RuntimeExpression::execute_expr(&self.orig, ast)
     }
 
-    pub fn execute_expr(expr: &Expression, mut ast: RuntimeAST) -> usize {
+    pub fn execute_expr(expr: &Expression, mut ast: RuntimeAST) -> isize {
         // println!("execute_expr {:?}", RuntimeExpression::expr_to_string(&expr));
 
         match expr {
@@ -198,7 +198,7 @@ impl RuntimeExpression {
         }
     }
 
-    pub fn run_math(math: MathType, var1: RuntimeExpression, var2: RuntimeExpression, ast: RuntimeAST) -> usize {
+    pub fn run_math(math: MathType, var1: RuntimeExpression, var2: RuntimeExpression, ast: RuntimeAST) -> isize {
         match math {
             MathType::Add               => var1.execute(ast.clone()) + var2.execute(ast),
             MathType::Subtract          => var1.execute(ast.clone()) - var2.execute(ast),

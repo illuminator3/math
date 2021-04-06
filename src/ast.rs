@@ -35,7 +35,7 @@ pub enum Expression {
         arguments: Vec<Expression>
     }*/,
     NumberValue {
-        value: usize
+        value: isize
     },
     VariableAccess {
         variable: String

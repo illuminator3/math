@@ -211,7 +211,7 @@ fn fake_main(file: &Path) {
             |args, ast| {
                 // println!("IF {:?}", RuntimeExpression::expr_to_string(args.get(0).unwrap().orig()));
 
-                return if args.get(0).unwrap().execute(ast.clone()) == 1 as usize {
+                return if args.get(0).unwrap().execute(ast.clone()) == 1 {
                     // println!("true");
 
                     args.get(1).unwrap().execute(ast)
