@@ -260,7 +260,17 @@ pub fn actual_parse_expression(expr: PartExpression, variables: &Vec<Variable>, 
 
                     match expression {
                         Expression::NumberValue { .. } => {
-                            expression
+                            Expression::Math {
+                                var1: Box::new(expression.clone()),
+                                var2: Box::new(Expression::Math {
+                                    var1: Box::new(expression),
+                                    var2: Box::new(Expression::NumberValue {
+                                        value: 2
+                                    }),
+                                    math: MathType::Multiply
+                                }),
+                                math: MathType::Subtract
+                            }
                         }
                         _ => token.err(&format!("Can't apply {} prefix to this", prefix))
                     }
