@@ -278,6 +278,21 @@ define factorial(n) = if(n <= 1, 1, n * factorial(n - 1))
 println(factorial(input()))
 ----
 
+== Naming convention
+
+|===
+|Item |Convention
+
+| Variables
+| camelCase
+
+| Functions
+| camelCase
+
+| Constants
+| UPPER_SNAKE_CASE
+|===
+
 == Current issues
 
 * The lexer is really slow
