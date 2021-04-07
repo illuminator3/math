@@ -439,9 +439,46 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
-<body class="article">
+<body class="article toc2 toc-left">
 <div id="header">
 <h1>math, an integer-only functional programming language</h1>
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_syntax">Syntax</a>
+<ul class="sectlevel2">
+<li><a href="#_variables_functions_and_constants">Variables, functions and constants</a>
+<ul class="sectlevel3">
+<li><a href="#_variables">Variables</a>
+<ul class="sectlevel4">
+<li><a href="#_constants">Constants</a></li>
+</ul>
+</li>
+<li><a href="#_functions">Functions</a></li>
+<li><a href="#_examples">Examples</a></li>
+<li><a href="#_external_functions">External functions</a></li>
+</ul>
+</li>
+<li><a href="#_expressions">Expressions</a></li>
+<li><a href="#_where_part_in_a_variable_definition">Where part in a variable definition</a></li>
+<li><a href="#_new_lines_and_the_pipe_operator">New lines and the pipe (|) operator</a></li>
+<li><a href="#_caching">Caching</a></li>
+<li><a href="#_comments">Comments</a></li>
+</ul>
+</li>
+<li><a href="#_examples_2">Examples</a>
+<ul class="sectlevel2">
+<li><a href="#_function_to_calculate_factorial_of_number">Function to calculate factorial of number</a></li>
+<li><a href="#_function_to_calculate_nth_fibonacci_number">Function to calculate nth fibonacci number</a></li>
+<li><a href="#_factorial_of_user_input">Factorial of user input</a></li>
+</ul>
+</li>
+<li><a href="#_naming_convention">Naming convention</a></li>
+<li><a href="#_current_issues">Current issues</a></li>
+<li><a href="#_coming_soon">Coming soon</a></li>
+<li><a href="#_license">License</a></li>
+</ul>
+</div>
 </div>
 <div id="content">
 <div class="sect1">
@@ -452,7 +489,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 Before we dive into the expression part let&#8217;s look at the general structure of variable and function definitions.</p>
 </div>
 <div class="sect2">
-<h3 id="_variables_and_functions">Variables and functions</h3>
+<h3 id="_variables_functions_and_constants">Variables, functions and constants</h3>
+<div class="sect3">
+<h4 id="_variables">Variables</h4>
 <div class="paragraph">
 <p>Variable definitions are structured like this</p>
 </div>
@@ -461,6 +500,24 @@ Before we dive into the expression part let&#8217;s look at the general structur
 <pre class="highlight"><code class="language-math" data-lang="math">let &lt;variable-name&gt; = &lt;definition&gt;</code></pre>
 </div>
 </div>
+<div class="sect4">
+<h5 id="_constants">Constants</h5>
+<div class="paragraph">
+<p>Constants are like variables, the only difference is that they can&#8217;t be reassigned</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-math" data-lang="math"># declare a constant
+const MY_CONST = 1
+
+# this will throw an error
+MY_CONST = 2</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_functions">Functions</h4>
 <div class="paragraph">
 <p>Function definitions follow (almost) the exact same format</p>
 </div>
@@ -469,12 +526,20 @@ Before we dive into the expression part let&#8217;s look at the general structur
 <pre class="highlight"><code class="language-math" data-lang="math">define &lt;function-name&gt;(&lt;parameters&gt;) = &lt;definition&gt;</code></pre>
 </div>
 </div>
+</div>
+<div class="sect3">
+<h4 id="_examples">Examples</h4>
 <div class="paragraph">
-<p>Let&#8217;s look at some examples of variable and function definitions</p>
+<p>Let&#8217;s look at some examples of variable, function and constant definitions</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-math" data-lang="math">let n = 2</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-math" data-lang="math">const ONE = 1</code></pre>
 </div>
 </div>
 <div class="listingblock">
@@ -506,8 +571,8 @@ define xplusone() = x + 1</code></pre>
 </div>
 </div>
 </div>
-<div class="sect2">
-<h3 id="_external_functions">External functions</h3>
+<div class="sect3">
+<h4 id="_external_functions">External functions</h4>
 <div class="paragraph">
 <p>You might&#8217;ve noticed that we were using a function called "if" in the last example,
 "if" is one of the default external functions which is defined in native rust code.
@@ -530,20 +595,6 @@ input()</code></pre>
 </div>
 <div class="paragraph">
 <p><em>In the near future you&#8217;ll be able to implement your own external functions.</em></p>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_constants">Constants</h3>
-<div class="paragraph">
-<p>Constants are like variables, the only difference is that they can&#8217;t be reassigned</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-math" data-lang="math"># declare a constant
-const MY_CONST = 1
-
-# this will throw an error
-MY_CONST = 2</code></pre>
 </div>
 </div>
 </div>
@@ -788,7 +839,7 @@ f(1, 50)</code></pre>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_examples">Examples</h2>
+<h2 id="_examples_2">Examples</h2>
 <div class="sectionbody">
 <div class="sect2">
 <h3 id="_function_to_calculate_factorial_of_number">Function to calculate factorial of number</h3>
@@ -899,7 +950,7 @@ println(factorial(input()))</code></pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2021-04-07 22:34:09 +0200
+Last updated 2021-04-07 22:39:32 +0200
 </div>
 </div>
 </body>

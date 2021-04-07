@@ -1,28 +1,53 @@
 = math, an integer-only functional programming language
 :icons: font
+:toc: left
+:toclevels: 5
 
 == Syntax
 
 The syntax is really easy; almost everything is an expression except two things: variable and function definitions.
 Before we dive into the expression part let's look at the general structure of variable and function definitions.
 
-=== Variables and functions
+=== Variables, functions and constants
+
+==== Variables
 
 Variable definitions are structured like this
 [source,math]
 ----
 let <variable-name> = <definition>
 ----
+
+===== Constants
+
+Constants are like variables, the only difference is that they can't be reassigned
+[source,math]
+----
+# declare a constant
+const MY_CONST = 1
+
+# this will throw an error
+MY_CONST = 2
+----
+
+==== Functions
+
 Function definitions follow (almost) the exact same format
 [source,math]
 ----
 define <function-name>(<parameters>) = <definition>
 ----
 
-Let's look at some examples of variable and function definitions
+==== Examples
+
+Let's look at some examples of variable, function and constant definitions
 [source,math]
 ----
 let n = 2
+----
+[source,math]
+----
+const ONE = 1
 ----
 [source,math]
 ----
@@ -47,7 +72,7 @@ You can even build complex things like a function which calculates the factorial
 define factorial(n) = if(n <= 1, 1, n * factorial(n - 1))
 ----
 
-=== External functions
+==== External functions
 
 You might've noticed that we were using a function called "if" in the last example,
 "if" is one of the default external functions which is defined in native rust code.
@@ -68,18 +93,6 @@ input()
 ----
 
 _In the near future you'll be able to implement your own external functions._
-
-=== Constants
-
-Constants are like variables, the only difference is that they can't be reassigned
-[source,math]
-----
-# declare a constant
-const MY_CONST = 1
-
-# this will throw an error
-MY_CONST = 2
-----
 
 === Expressions
 
