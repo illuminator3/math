@@ -69,6 +69,18 @@ input()
 
 _In the near future you'll be able to implement your own external functions._
 
+=== Constants
+
+Constants are like variables, the only difference is that they can't be reassigned
+[source,math]
+----
+# declare a constant
+const MY_CONST = 1
+
+# this will throw an error
+MY_CONST = 2
+----
+
 === Expressions
 
 As mentioned before, almost everything in this language is an expression.
