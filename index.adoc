@@ -96,6 +96,9 @@ x * y
 # Divide x by y
 x / y
 
+# x to the power of y
+x ^ y
+
 # Check if x and y are equal (1 if both are equal, 0 if not)
 x == y
 
