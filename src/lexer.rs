@@ -65,7 +65,7 @@ impl LexedToken {
     }
 
     pub fn err(&self, message: &str) -> ! {
-        panic!("\n{}\n{} |     {}\n{} |{}{} {} [{}]\n",
+        panic!("\n{}\n{} |     {}\n{} |{}{} {} [{}]",
                if self.line == 0 {
                    "".to_owned()
                } else {
@@ -82,7 +82,7 @@ impl LexedToken {
     }
 
     pub fn err_neg_offset(&self, message: &str, offset: isize) -> ! {
-        panic!("\n{}\n{} |     {}\n{} |{}{} {} [{}]\n",
+        panic!("\n{}\n{} |     {}\n{} |{}{} {} [{}]",
                if self.line == 0 {
                    "".to_owned()
                } else {
