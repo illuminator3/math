@@ -98,7 +98,7 @@ fn infix_parser(token: Token) -> Parser {
             runner: default_parse_infix,
             precedence: Precedence::Sum
         },
-        "MULTIPLY" | "DIVIDE" => Parser::Infix {
+        "MULTIPLY" | "DIVIDE" | "POW" => Parser::Infix {
             token,
             runner: default_parse_infix,
             precedence: Precedence::Product
@@ -281,7 +281,7 @@ pub fn actual_parse_expression(expr: PartExpression, variables: &Vec<Variable>, 
         },
         PartExpression::InfixOperator { operator, left, right, token } => {
             match operator.as_str() {
-                "+" | "-" | "*" | "/" | "==" | "<" | ">" | "=!" | "<=" | ">=" => {
+                "+" | "-" | "*" | "/" | "==" | "<" | ">" | "=!" | "<=" | ">=" | "^" => {
                     Expression::Math {
                         var1: Box::new(actual_parse_expression(*left.clone(), &variables.clone(), &functions.clone())),
                         var2: Box::new(actual_parse_expression(*right.clone(), &variables.clone(), &functions.clone())),

@@ -332,6 +332,7 @@ impl RuntimeExpression {
             MathType::Bigger            => BigInt::from(if var1.execute(ast) > var2.execute(ast) { 1 } else { 0 }),
             MathType::SmallerOrEquals   => BigInt::from(if var1.execute(ast) <= var2.execute(ast) { 1 } else { 0 }),
             MathType::Smaller           => BigInt::from(if var1.execute(ast) < var2.execute(ast) { 1 } else { 0 }),
+            MathType::Pow               => var1.execute(ast).pow(*var2.execute(ast).to_u32_digits().1.last().unwrap())
         }
     }
 

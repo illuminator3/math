@@ -25,37 +25,42 @@ macro_rules! external {
     };
 }
 
+const DEV: bool = false;
+
 fn main() {
-    let mut args: Vec<String> = env::args().collect();
+    if DEV {
+        fake_main(Path::new("test.math"));
+    } else {
+        let mut args: Vec<String> = env::args().collect();
 
-    args.remove(0);
+        args.remove(0);
 
-    if args.len() != 1 {
-        println!("Usage: math <file>");
+        if args.len() != 1 {
+            println!("Usage: math <file>");
 
-        return;
+            return;
+        }
+
+        let file = args.get(0).expect("uh");
+        let path = Path::new(file);
+
+        if !path.exists() {
+            println!("File not found");
+
+            return;
+        }
+
+        set_hook(Box::new(|info| { // "suppress" panics so that only their message will be shown
+            let mut s = format!("{}", info);
+
+            s = s.replace("panicked at '", "");
+            s = s[..s.rfind("', src\\").expect("Malformed string")].to_owned();
+
+            println!("{}", s);
+        }));
+
+        fake_main(path);
     }
-
-    let file = args.get(0).expect("uh");
-    let path = Path::new(file);
-
-    if !path.exists() {
-        println!("File not found");
-
-        return;
-    }
-
-    set_hook(Box::new(|info| { // "suppress" panics so that only their message will be shown
-        let mut s = format!("{}", info);
-
-        s = s.replace("panicked at '", "");
-        s = s[..s.rfind("', src\\").expect("Malformed string")].to_owned();
-
-        println!("{}", s);
-    }));
-
-    // fake_main(Path::new("test.math"));
-    fake_main(path);
 }
 
 fn fake_main(file: &Path) {
@@ -159,6 +164,11 @@ fn fake_main(file: &Path) {
         token(
             "MULTIPLY",
             "*",
+            false
+        ),
+        token(
+            "POW",
+            "^",
             false
         ),
         // token(

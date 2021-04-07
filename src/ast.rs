@@ -91,7 +91,8 @@ pub enum MathType {
     BiggerOrEquals,
     Bigger,
     SmallerOrEquals,
-    Smaller
+    Smaller,
+    Pow
 }
 
 impl MathType {
@@ -106,12 +107,13 @@ impl MathType {
             MathType::BiggerOrEquals => ">=",
             MathType::Bigger => ">",
             MathType::SmallerOrEquals => "<=",
-            MathType::Smaller => "<"
+            MathType::Smaller => "<",
+            MathType::Pow => "^"
         }.to_owned()
     }
 
     fn entries() -> Vec<MathType> {
-        vec![MathType::Add, MathType::Subtract, MathType::Multiply, MathType::Divide, MathType::Equals, MathType::NotEquals, MathType::BiggerOrEquals, MathType::Bigger, MathType::SmallerOrEquals, MathType::Smaller]
+        vec![MathType::Add, MathType::Subtract, MathType::Multiply, MathType::Divide, MathType::Equals, MathType::NotEquals, MathType::BiggerOrEquals, MathType::Bigger, MathType::SmallerOrEquals, MathType::Smaller, MathType::Pow]
     }
 
     pub fn of(operator: String) -> MathType {
