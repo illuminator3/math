@@ -82,6 +82,11 @@ fn fake_main(file: &Path) {
             false
         ),
         token(
+            "CACHE",
+            "cache",
+            false
+        ),
+        token(
             "COMMA",
             ",",
             false
@@ -206,7 +211,7 @@ fn fake_main(file: &Path) {
             |args, ast| {
                 // println!("IF {:?}", RuntimeExpression::expr_to_string(args.get(0).unwrap().orig()));
 
-                return if args.get(0).unwrap().execute(ast.clone()) == BigInt::from(1) {
+                return if args.get(0).unwrap().execute(ast) == BigInt::from(1) {
                     // println!("true");
 
                     args.get(1).unwrap().execute(ast)

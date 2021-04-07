@@ -16,7 +16,8 @@ pub struct Function {
     pub name: String,
     pub definition: Expression,
     pub parameters: Vec<String>,
-    pub pre_definition: PartExpression
+    pub pre_definition: PartExpression,
+    pub cached: bool
 }
 
 #[derive(Debug, Clone)]

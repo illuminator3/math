@@ -63,7 +63,8 @@ fn map_function(f: ExternalRuntimeFunction) -> Function {
         name: f.name().to_owned(),
         definition: Expression::External,
         parameters: (0..*f.parameters()).map(|i| format!("p{}", i)).collect::<Vec<String>>(),
-        pre_definition: PartExpression::None
+        pre_definition: PartExpression::None,
+        cached: false
     }
 }
 
@@ -230,6 +231,7 @@ fn pre_parse_function(queue: &mut TokenQueue) -> Function {
     let mut definition = PartExpression::None;
     let mut parameters = Vec::<String>::new();
     let mut lines_left = 1;
+    let mut cached = false;
 
     while lines_left > 0 && queue.is_not_empty() {
         let next = queue.peek();
@@ -344,6 +346,7 @@ fn pre_parse_function(queue: &mut TokenQueue) -> Function {
 
                 name = next.content().to_owned();
             },
+            "CACHE" => cached = true,
             "WHITESPACE" => {}, // do nothing
             _ => {
                 if !name.is_empty() {
@@ -359,7 +362,8 @@ fn pre_parse_function(queue: &mut TokenQueue) -> Function {
         name,
         definition: Expression::None,
         parameters,
-        pre_definition: definition
+        pre_definition: definition,
+        cached
     }
 }
 
