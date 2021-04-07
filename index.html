@@ -486,7 +486,7 @@ Before we dive into the expression part let&#8217;s look at the general structur
 <div class="content">
 <pre class="highlight"><code class="language-math" data-lang="math">let x = 2
 
-define xplusone() = n + 1</code></pre>
+define xplusone() = x + 1</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -545,6 +545,9 @@ All available expressions are</p>
 
 # Retrieve value of variable x
 x
+
+# Negate x
+-x
 
 # Add x and y together
 x + y
@@ -714,6 +717,46 @@ let n = (rf + 3) * (rg + 2) + rf where rf = f(a), rg = g(a)</code></pre>
 </div>
 </div>
 <div class="sect2">
+<h3 id="_caching">Caching</h3>
+<div class="paragraph">
+<p>Making a function cached (the result will be stored and automatically retrieved when the arguments match) can be done by annotating it with the "cache" keyword</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-math" data-lang="math">define cache f(...) = ...</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This can be useful when doing things like factorial; but you should not cache every function! If you only ever call the function once or do simple things such as
+adding two numbers together then you should not make it cached. Caching can sometimes increase interpretion time!</p>
+</div>
+<div class="paragraph">
+<p>As mentioned before it can be extremely useful when doing e.g. factorial calculation. Let&#8217;s look at an example</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-math" data-lang="math">define factorial(n) = if(n &lt;= 1, 1, n * factorial(n - 1))
+
+define f(n, to) = if(n &gt;= to, println(factorial(n)), println(factorial(n)) + f(n + 1, to))
+
+f(1, 50)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This code will print out the factorials of 1 to 50, normally the interpretion time would take around ~190ms. But if we now add the cache keyword to it</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-math" data-lang="math">define cache factorial(n) = ...
+
+...</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>it will only take about ~60ms.</p>
+</div>
+</div>
+<div class="sect2">
 <h3 id="_comments">Comments</h3>
 <div class="paragraph">
 <p>Commenting code can be done by putting a # at the start of a line</p>
@@ -721,6 +764,37 @@ let n = (rf + 3) * (rg + 2) + rf where rf = f(a), rg = g(a)</code></pre>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-math" data-lang="math"># This is a comment</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_examples">Examples</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_function_to_calculate_factorial_of_number">Function to calculate factorial of number</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-math" data-lang="math">define factorial(n) = if(n &lt;= 1, 1, n * factorial(n - 1))</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_function_to_calculate_nth_fibonacci_number">Function to calculate nth fibonacci number</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-math" data-lang="math">define fibonacci(n) = if(n &lt;= 0, 0, if(n == 1, 1, fibonacci(n - 1) + fibonacci(n - 2))</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_factorial_of_user_input">Factorial of user input</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-math" data-lang="math">define factorial(n) = if(n &lt;= 1, 1, n * factorial(n - 1))
+
+println(factorial(input()))</code></pre>
 </div>
 </div>
 </div>
@@ -750,22 +824,30 @@ let n = (rf + 3) * (rg + 2) + rf where rf = f(a), rg = g(a)</code></pre>
 <p>Compiling (v1.2)</p>
 </li>
 <li>
-<p>Caching (v1.1)</p>
-</li>
-<li>
-<p>Defining external functions (v1.1)</p>
+<p>Defining external functions (v1.3)</p>
 </li>
 <li>
 <p>Libraries (global modifier) (v1.2)</p>
 </li>
+<li>
+<p>Matrices (v1.2)</p>
+</li>
 </ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_license">License</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This project is licensed under the Apache License 2.0 - see the <a href="https://github.com/illuminator3/math/blob/master/LICENSE" class="resource" target="_blank" rel="noopener">LICENSE</a> file for details</p>
 </div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2021-04-06 22:25:29 +0200
+Last updated 2021-04-07 15:52:40 +0200
 </div>
 </div>
 </body>

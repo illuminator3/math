@@ -32,7 +32,7 @@ define f(x) = x + 1
 ----
 let x = 2
 
-define xplusone() = n + 1
+define xplusone() = x + 1
 ----
 
 Note that functions can have as many parameters as you wish
@@ -80,6 +80,9 @@ All available expressions are
 
 # Retrieve value of variable x
 x
+
+# Negate x
+-x
 
 # Add x and y together
 x + y
@@ -199,12 +202,65 @@ let a = |
 0
 ----
 
+=== Caching
+
+Making a function cached (the result will be stored and automatically retrieved when the arguments match) can be done by annotating it with the "cache" keyword
+[source,math]
+----
+define cache f(...) = ...
+----
+This can be useful when doing things like factorial; but you should not cache every function! If you only ever call the function once or do simple things such as 
+adding two numbers together then you should not make it cached. Caching can sometimes increase interpretion time!
+
+As mentioned before it can be extremely useful when doing e.g. factorial calculation. Let's look at an example
+[source,math]
+----
+define factorial(n) = if(n <= 1, 1, n * factorial(n - 1))
+
+define f(n, to) = if(n >= to, println(factorial(n)), println(factorial(n)) + f(n + 1, to))
+
+f(1, 50)
+----
+This code will print out the factorials of 1 to 50, normally the interpretion time would take around ~190ms. But if we now add the cache keyword to it
+[source,math]
+----
+define cache factorial(n) = ...
+
+...
+----
+it will only take about ~60ms.
+
 === Comments
 
 Commenting code can be done by putting a # at the start of a line
 [source,math]
 ----
 # This is a comment
+----
+
+== Examples
+
+=== Function to calculate factorial of number
+
+[source,math]
+----
+define factorial(n) = if(n <= 1, 1, n * factorial(n - 1))
+----
+
+=== Function to calculate nth fibonacci number
+
+[source,math]
+----
+define fibonacci(n) = if(n <= 0, 0, if(n == 1, 1, fibonacci(n - 1) + fibonacci(n - 2))
+----
+
+=== Factorial of user input
+
+[source,math]
+----
+define factorial(n) = if(n <= 1, 1, n * factorial(n - 1))
+
+println(factorial(input()))
 ----
 
 == Current issues
@@ -215,6 +271,10 @@ Commenting code can be done by putting a # at the start of a line
 
 * Pointers (v1.2)
 * Compiling (v1.2)
-* Caching (v1.1)
-* Defining external functions (v1.1)
+* Defining external functions (v1.3)
 * Libraries (global modifier) (v1.2)
+* Matrices (v1.2)
+
+== License
+
+This project is licensed under the Apache License 2.0 - see the https://github.com/illuminator3/math/blob/master/LICENSE[LICENSE,role=resource,window=_blank] file for details
