@@ -72,6 +72,11 @@ fn fake_main(file: &Path) {
             false
         ),
         token(
+            "CONST",
+            "const",
+            false
+        ),
+        token(
             "DEFINE",
             "define",
             false

@@ -289,9 +289,6 @@ pub fn actual_parse_expression(expr: PartExpression, variables: &Vec<Variable>, 
                     }
                 },
                 "=" => {
-                    // Expression::VariableAssignment {
-                    //     var:
-                    // }
                     let actual_left = actual_parse_expression(*left.clone(), &variables.clone(), &functions.clone());
 
                     match actual_left {
@@ -299,13 +296,15 @@ pub fn actual_parse_expression(expr: PartExpression, variables: &Vec<Variable>, 
                         _ => token.err("Expected variable access on left side of infix operator")
                     }
 
-                    // Expression::Math {
-                    //     var1: Box::new(actual_parse_expression(*left.clone(), &variables.clone())),
-                    //     var2: Box::new(actual_parse_expression(*right.clone(), &variables.clone())),
-                    //     math: MathType::Equals
-                    // }
+                    let var = actual_left.variable_access_variable().to_owned();
+                    let actual_var = variables.into_iter().find(|v| v.name.eq(&var)).unwrap();
+
+                    if actual_var.constant {
+                        token.err("Cannot reassign constant");
+                    }
+
                     Expression::VariableAssignment {
-                        variable: actual_left.variable_acess_variable().to_owned(),
+                        variable: var,
                         value: Box::new(actual_parse_expression(*right.clone(), &variables.clone(), &functions.clone()))
                     }
                 },

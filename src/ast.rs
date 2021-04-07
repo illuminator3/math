@@ -26,7 +26,8 @@ pub struct Variable {
     pub definition: Expression,
     pub wherepart: Vec<Expression>,
     pub pre_definition: PartExpression,
-    pub pre_wherepart: Vec<PartExpression>
+    pub pre_wherepart: Vec<PartExpression>,
+    pub constant: bool
 }
 
 #[derive(Debug, Eq, PartialEq)]
@@ -72,7 +73,7 @@ impl Clone for Expression {
 }
 
 impl Expression {
-    pub fn variable_acess_variable(&self) -> &String {
+    pub fn variable_access_variable(&self) -> &String {
         match self {
             Expression::VariableAccess { variable } => variable,
             _ => panic!("Not supported")

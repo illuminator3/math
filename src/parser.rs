@@ -18,6 +18,13 @@ pub fn parse(tokens: Vec<LexedToken>, external_functions: Vec<ExternalRuntimeFun
 
         match next.token_type().id() {
             "LET" => variables.push(pre_parse_variable(&mut queue)),
+            "CONST" => {
+                let mut var = pre_parse_variable(&mut queue);
+
+                var.constant = true;
+
+                variables.push(var);
+            }
             "DEFINE" => functions.push(pre_parse_function(&mut queue)),
             "WHITESPACE" | "NEW_LINE" => {}, // do nothing
             // "IDENTIFIER" =>
@@ -198,7 +205,8 @@ fn pre_parse_variable(queue: &mut TokenQueue) -> Variable {
         definition: Expression::None, // do in post parse so that we can do lookahead variable parsing etc...
         wherepart: vec![],
         pre_definition: definition,
-        pre_wherepart: wherepart
+        pre_wherepart: wherepart,
+        constant: false
     }
 }
 
@@ -222,7 +230,8 @@ fn fake_variable(name: String) -> Variable {
         definition: Expression::None,
         wherepart: vec![],
         pre_definition: PartExpression::None,
-        pre_wherepart: vec![]
+        pre_wherepart: vec![],
+        constant: false
     }
 }
 
