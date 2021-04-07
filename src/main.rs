@@ -199,7 +199,7 @@ fn fake_main(file: &Path) {
     ]);
     let content = read_to_string(file).expect("Error while reading file");
     let r = SystemTime::now().duration_since(UNIX_EPOCH).expect("Time went backwards").as_micros();
-    let lex_result = full_lex(content.to_owned(), "test2.math".to_owned(), "#".to_owned(), data);
+    let lex_result = full_lex(content.to_owned(), file.file_name().unwrap().to_str().unwrap().to_owned(), "#".to_owned(), data);
     let l = SystemTime::now().duration_since(UNIX_EPOCH).expect("Time went backwards").as_micros();
     let external_functions = vec![
         external!( // println(output)
