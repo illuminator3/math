@@ -69,11 +69,11 @@ impl LexedToken {
                if self.line == 0 {
                    "".to_owned()
                } else {
-                   self.line.to_string() + " |"
+                   " ".repeat(self.line.to_string().len()) + " |"
                },
                self.line + 1,
                self.line_content,
-               self.line + 2,
+               self.line.to_string().len(),
                " ".repeat("     ".len() + self.index),
                "^".repeat(self.content.len()),
                message,
@@ -86,11 +86,11 @@ impl LexedToken {
                if self.line == 0 {
                    "".to_owned()
                } else {
-                   self.line.to_string() + " |"
+                   " ".repeat(self.line.to_string().len()) + " |"
                },
                self.line + 1,
                self.line_content,
-               self.line + 2,
+               self.line.to_string().len(),
                " ".repeat(("     ".len() as isize + self.index as isize - offset) as usize),
                "^".repeat(self.content.len()),
                message,
