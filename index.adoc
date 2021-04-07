@@ -277,6 +277,7 @@ println(factorial(input()))
 * Defining external functions (v1.3)
 * Libraries (global modifier) (v1.2)
 * Matrices (v1.2)
+* Function references & (v1.2)
 
 == License
 
