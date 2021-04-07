@@ -103,7 +103,7 @@ fn infix_parser(token: Token) -> Parser {
             runner: default_parse_infix,
             precedence: Precedence::Product
         },
-        "EQUALS" | "NOT_EQUALS" | "BIGGER_OR_EQUALS" | "BIGGER" | "SMALLER_OR_EQUALS" | "ASSIGN" => Parser::Infix {
+        "EQUALS" | "NOT_EQUALS" | "BIGGER_OR_EQUALS" | "BIGGER" | "SMALLER_OR_EQUALS" => Parser::Infix {
             token,
             runner: default_parse_infix,
             precedence: Precedence::Conditional
@@ -312,14 +312,14 @@ pub fn actual_parse_expression(expr: PartExpression, variables: &Vec<Variable>, 
             }
         },
         PartExpression::FunctionInvocation { val, arguments, token } => {
-            let name = match *val {
+            let name = match *val.clone() {
                 PartExpression::Identifier { val, .. } => val,
                 _ => panic!("Internal error")
             };
             let args = arguments.into_iter().map(|a| actual_parse_expression(a, variables, functions)).collect::<Vec<Expression>>();
 
             if functions.into_iter().find(|f| f.name.eq(&name) && f.parameters.len() == args.len()).is_none() {
-                token.err_neg_offset("Function not found", name.len() as isize);
+                val.token().err("Function not found");
             }
 
             Expression::FunctionInvocation {
@@ -404,11 +404,18 @@ impl Clone for PartExpression {
     }
 }
 
-// impl PartExpression {
-//     fn clone(&self) -> PartExpression {
-//
-//     }
-// }
+impl PartExpression {
+    fn token(&self) -> &LexedToken {
+        match self {
+            PartExpression::Number { token, .. } => token,
+            PartExpression::Identifier { token, .. } => token,
+            PartExpression::PrefixOperator { token, .. } => token,
+            PartExpression::InfixOperator { token, .. } => token,
+            PartExpression::FunctionInvocation { token, .. } => token,
+            _ => panic!("token(&self) not available for this")
+        }
+    }
+}
 
 #[derive(Debug)]
 pub enum Precedence {

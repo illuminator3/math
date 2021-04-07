@@ -13,7 +13,8 @@ pub struct LexedToken {
     line: usize,
     index: usize,
     line_content: String,
-    token_type: Token
+    token_type: Token,
+    file: String,
 }
 
 #[derive(Debug)]
@@ -59,16 +60,42 @@ impl LexedToken {
         self
     }
 
-    pub fn err(&self, message: &str) -> ! {
-        self.err_offset(message, 0)
+    pub fn err_offset(&self, message: &str, offset: usize) -> ! {
+        self.err_neg_offset(message, -(offset as isize))
     }
 
-    pub fn err_offset(&self, message: &str, offset: usize) -> ! {
-        panic!("{} at ({}:{}):\n{}\n{}", message, self.line, self.index, self.line_content, " ".repeat(self.index as usize + offset) + "^")
+    pub fn err(&self, message: &str) -> ! {
+        panic!("\n{}\n{} |     {}\n{} |{}{} {} [{}]\n",
+               if self.line == 0 {
+                   "".to_owned()
+               } else {
+                   self.line.to_string() + " |"
+               },
+               self.line + 1,
+               self.line_content,
+               self.line + 2,
+               " ".repeat("     ".len() + self.index),
+               "^".repeat(self.content.len()),
+               message,
+               self.file
+        )
     }
 
     pub fn err_neg_offset(&self, message: &str, offset: isize) -> ! {
-        panic!("{} at ({}:{}):\n{}\n{}", message, self.line, self.index as isize - offset, self.line_content, " ".repeat((self.index as isize - offset) as usize) + "^")
+        panic!("\n{}\n{} |     {}\n{} |{}{} {} [{}]\n",
+               if self.line == 0 {
+                   "".to_owned()
+               } else {
+                   self.line.to_string() + " |"
+               },
+               self.line + 1,
+               self.line_content,
+               self.line + 2,
+               " ".repeat(("     ".len() as isize + self.index as isize - offset) as usize),
+               "^".repeat(self.content.len()),
+               message,
+               self.file
+        )
     }
 
     pub fn content(&self) -> &String {
@@ -97,7 +124,8 @@ impl LexedToken {
             line: self.line.clone(),
             index: self.index.clone(),
             line_content: self.line_content.clone(),
-            token_type: self.token_type.clone()
+            token_type: self.token_type.clone(),
+            file: self.file.clone()
         }
     }
 }
@@ -191,7 +219,8 @@ pub fn lex(lines: Vec<Line>, data: LexerData) -> Vec<LexedToken> {
                     line: i,
                     index,
                     line_content: l.content.clone(),
-                    token_type: *p
+                    token_type: *p,
+                    file: l.file.clone()
                 });
                 index += found.as_str().len();
                 found_token = true;
@@ -211,7 +240,8 @@ pub fn lex(lines: Vec<Line>, data: LexerData) -> Vec<LexedToken> {
                 "NEW_LINE",
                 "\n",
                 false
-            )
+            ),
+            file: l.file.clone()
         });
     });
 
