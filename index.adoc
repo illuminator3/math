@@ -85,6 +85,12 @@ print(output)
 # Prints out the first argument PLUS a new line
 println(output)
 
+# Prints a new line
+newline()
+
+# Prints a space (' ')
+empty()
+
 # Returns the second argument if the first argument is 1 otherwise the third argument
 if(condition, true, false)
 
