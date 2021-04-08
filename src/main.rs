@@ -5,9 +5,11 @@ use crate::parser::parse;
 use crate::interpreter::{interpret, ExternalRuntimeFunction, RuntimeExpression};
 use std::panic::{catch_unwind, set_hook};
 use std::env;
-use std::time::{SystemTime, UNIX_EPOCH};
-use std::io::stdin;
+use std::time::{SystemTime, UNIX_EPOCH, Duration};
+use std::io::{stdin, Write};
 use num_bigint::BigInt;
+use std::thread;
+use std::io::stdout;
 
 mod lexer;
 mod parser;
@@ -218,6 +220,8 @@ fn fake_main(file: &Path) {
             |args, ast| {
                 print!("{}", args.get(0).unwrap().execute(ast));
 
+                stdout().flush(); // flush so it gets printed
+
                 BigInt::from(0)
             }
         ),
@@ -253,6 +257,35 @@ fn fake_main(file: &Path) {
                 }
 
                 BigInt::from(result.unwrap())
+            }
+        ),
+        external!( // sleep(millis)
+            "sleep",
+            1,
+            |args, ast| {
+                thread::sleep(Duration::from_millis(*args.get(0).unwrap().execute(ast).to_u64_digits().1.get(0).unwrap()));
+
+                BigInt::from(0)
+            }
+        ),
+        external!( // newline()
+            "newline",
+            0,
+            |args, ast| {
+                println!();
+
+                BigInt::from(0)
+            }
+        ),
+        external!( // empty()
+            "empty",
+            0,
+            |args, ast| {
+                print!(" ");
+
+                stdout().flush(); // flush so it gets printed
+
+                BigInt::from(0)
             }
         )
     ];
