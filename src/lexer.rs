@@ -7,7 +7,7 @@ pub struct Line {
     file: String
 }
 
-#[derive(Debug, PartialEq, Eq, Clone)]
+#[derive(PartialEq, Debug, Clone)]
 pub struct LexedToken {
     content: String,
     line: usize,
@@ -22,11 +22,20 @@ pub struct LexerData {
     tokens: Vec<Token>
 }
 
-#[derive(Debug, PartialEq, Eq, Copy, Clone)]
+#[derive(Debug, Clone)]
 pub struct Token {
     id: &'static str,
-    regex: &'static str,
-    is_regex: bool
+    regex: Regex
+}
+
+impl PartialEq for Token {
+    fn eq(&self, other: &Self) -> bool {
+        self.id.eq(other.id) && self.regex.as_str().eq(other.regex.as_str())
+    }
+
+    fn ne(&self, other: &Self) -> bool {
+        !self.eq(other)
+    }
 }
 
 impl Line {
@@ -52,12 +61,8 @@ impl LexedToken {
         self
     }
 
-    pub fn check_type(self, expected: Token, message: String) -> LexedToken {
-        if self.token_type != expected {
-            self.err(&message);
-        }
-
-        self
+    pub fn check_type(self, expected: Token, message: &'static str) -> LexedToken {
+        self.check_id(expected.id, message)
     }
 
     pub fn err_offset(&self, message: &str, offset: usize) -> ! {
@@ -141,19 +146,21 @@ impl Token {
         &self.id
     }
 
-    pub fn regex(&self) -> &'static str {
+    pub fn regex(&self) -> &Regex {
         &self.regex
-    }
-
-    pub fn is_regex(&self) -> &bool {
-        &self.is_regex
     }
 
     pub fn empty() -> Token {
         Token {
             id: "",
-            regex: "",
-            is_regex: false
+            regex: Regex::new("^$").unwrap()
+        }
+    }
+
+    pub fn copy(&self) -> Token {
+        Token {
+            id: self.id,
+            regex: Regex::new(self.regex.as_str()).unwrap()
         }
     }
 }
@@ -177,8 +184,11 @@ pub fn data(tokens: Vec<Token>) -> LexerData {
 pub fn token(id: &'static str, regex: &'static str, is_regex: bool) -> Token {
     Token {
         id,
-        regex,
-        is_regex
+        regex: Regex::new(&format!("^{}", if is_regex {
+            regex.to_owned()
+        } else {
+            escape(regex)
+        })).unwrap()
     }
 }
 
@@ -194,19 +204,14 @@ pub fn lex(lines: Vec<Line>, data: LexerData) -> Vec<LexedToken> {
 
         while !l.content[index..].is_empty() {
             let mut found_token = false;
+            let content = &l.content[index..];
 
             data.tokens.iter().for_each(|p| {
                 if found_token {
                     return;
                 }
 
-                let content = &l.content[index..];
-                let regex = Regex::new(&format!("^{}", if p.is_regex {
-                    p.regex.to_owned()
-                } else {
-                    escape(p.regex)
-                })).unwrap(); // escape regex if p.is_regex == false
-                let option = regex.find(content);
+                let option = p.regex.find(content);
 
                 if option.is_none() {
                     return;
@@ -219,7 +224,7 @@ pub fn lex(lines: Vec<Line>, data: LexerData) -> Vec<LexedToken> {
                     line: i,
                     index,
                     line_content: l.content.clone(),
-                    token_type: *p,
+                    token_type: p.clone(),
                     file: l.file.clone()
                 });
                 index += found.as_str().len();

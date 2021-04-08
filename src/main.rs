@@ -197,6 +197,7 @@ fn fake_main(file: &Path) {
             true
         )
     ]);
+    let t = SystemTime::now().duration_since(UNIX_EPOCH).expect("Time went backwards").as_micros();
     let content = read_to_string(file).expect("Error while reading file");
     let r = SystemTime::now().duration_since(UNIX_EPOCH).expect("Time went backwards").as_micros();
     let lex_result = full_lex(content.to_owned(), file.file_name().unwrap().to_str().unwrap().to_owned(), "#".to_owned(), data);
@@ -261,7 +262,8 @@ fn fake_main(file: &Path) {
     interpret(parse_result, external_functions);
 
     let i = SystemTime::now().duration_since(UNIX_EPOCH).expect("Time went backwards").as_micros();
-    let read_t = r - start;
+    let token_t = t - start;
+    let read_t = r - t;
     let lex_t = l - r;
     let parse_t = p - l;
     let interpret_t = i - p;
@@ -276,5 +278,5 @@ fn fake_main(file: &Path) {
         }
     };
 
-    println!("Finished in {} (R: {} L: {} P: {} I: {})", t_stuff(total_t), t_stuff(read_t), t_stuff(lex_t), t_stuff(parse_t), t_stuff(interpret_t));
+    println!("Finished in {} (T: {}, R: {} L: {} P: {} I: {})", t_stuff(total_t), t_stuff(token_t), t_stuff(read_t), t_stuff(lex_t), t_stuff(parse_t), t_stuff(interpret_t));
 }

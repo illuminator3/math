@@ -75,8 +75,8 @@ impl Parser {
         }
     }
 
-    fn token(&self) -> Token {
-        match *self {
+    fn token(&self) -> &Token {
+        match self.clone() {
             Parser::Infix { token, .. } | Parser::Prefix { token, .. } => token,
         }
     }
@@ -165,7 +165,7 @@ fn infix_parser(token: Token) -> Parser {
 
 fn prefix_parser(token: Token) -> Parser {
     Parser::Prefix {
-        token,
+        token: token.clone(),
         runner: match token.id() {
             "MINUS" => |queue, t| -> PartExpression {
                 PartExpression::PrefixOperator {
@@ -331,7 +331,7 @@ pub fn actual_parse_expression(expr: PartExpression, variables: &Vec<Variable>, 
     };
 }
 
-#[derive(PartialEq, Eq, Debug)]
+#[derive(PartialEq, Debug)]
 pub enum PartExpression {
     None, // for parsing
     Comment, // for loose expression parsing to work
