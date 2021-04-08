@@ -90,6 +90,9 @@ if(condition, true, false)
 
 # Reads a number from stdin (console)
 input()
+
+# Waits millis milliseconds
+wait(millis)
 ----
 
 _In the near future you'll be able to implement your own external functions._
