@@ -11,6 +11,8 @@ pub fn parse(tokens: Vec<LexedToken>, external_functions: Vec<ExternalRuntimeFun
     let mut functions = external_functions.into_iter().map(map_function).collect::<Vec<Function>>();
     let mut loose_expressions_pre = Vec::<PartExpression>::new();
 
+    queue.purge_all("WHITESPACE");
+
     // pre parse
 
     while queue.is_not_empty() {
@@ -26,11 +28,7 @@ pub fn parse(tokens: Vec<LexedToken>, external_functions: Vec<ExternalRuntimeFun
                 variables.push(var);
             }
             "DEFINE" => functions.push(pre_parse_function(&mut queue)),
-            "WHITESPACE" | "NEW_LINE" => {}, // do nothing
-            // "IDENTIFIER" =>
-            // _ => {
-            //     queue.back()
-            // }
+            "NEW_LINE" => {}, // do nothing
             _ => {
                 queue.back();
 
@@ -85,7 +83,6 @@ fn pre_parse_loose_expression(queue: &mut TokenQueue) -> PartExpression {
         match next.token_type().id() {
             "PIPE" => lines_left += 1,
             "NEW_LINE" => lines_left -= 1,
-            "WHITESPACE" => {}, // do nothing
             _ => actual_tokens.push(next)
         }
     }
@@ -119,8 +116,6 @@ fn pre_parse_variable(queue: &mut TokenQueue) -> Variable {
     while lines_left > 0 && queue.is_not_empty() {
         let next = queue.peek();
 
-        // println!("ID => '{}' Content => '{}'", next.token_type().id(), next.content());
-
         match next.token_type().id() {
             "PIPE" => lines_left += 1,
             "NEW_LINE" => lines_left -= 1,
@@ -145,8 +140,6 @@ fn pre_parse_variable(queue: &mut TokenQueue) -> Variable {
                         lines_left += 1;
 
                         break;
-                    } else if id.eq("WHITESPACE") { // this literally took me 1 hour to debug I hate my life
-                        continue;
                     }
 
                     if id.eq("WHERE") || lines_left == 0 {
@@ -161,15 +154,6 @@ fn pre_parse_variable(queue: &mut TokenQueue) -> Variable {
                 let mut expr_queue = token_queue(expr_queue_vec);
 
                 definition = parse_expression_part(&mut expr_queue, Precedence::None);
-
-                // loop {
-                //     let next = queue.peek();
-                //
-                //     match next.token_type().id() {
-                //         "NEW_LINE" => break,
-                //         _ => {}
-                //     }
-                // }
             },
             "IDENTIFIER" => {
                 if !name.is_empty() {
@@ -189,7 +173,6 @@ fn pre_parse_variable(queue: &mut TokenQueue) -> Variable {
 
                 todo!("where part");
             },
-            "WHITESPACE" => {}, // do nothing
             _ => {
                 if !name.is_empty() {
                     next.err("Expected =");
@@ -269,8 +252,6 @@ fn pre_parse_function(queue: &mut TokenQueue) -> Function {
                         lines_left += 1;
 
                         break;
-                    } else if id.eq("WHITESPACE") {
-                        continue;
                     }
 
                     if lines_left == 0 || id.eq("ASSIGN") {
@@ -331,8 +312,6 @@ fn pre_parse_function(queue: &mut TokenQueue) -> Function {
                         lines_left += 1;
 
                         break;
-                    } else if id.eq("WHITESPACE") {
-                        continue;
                     }
 
                     if lines_left == 0 {
@@ -356,7 +335,6 @@ fn pre_parse_function(queue: &mut TokenQueue) -> Function {
                 name = next.content().to_owned();
             },
             "CACHE" => cached = true,
-            "WHITESPACE" => {}, // do nothing
             _ => {
                 if !name.is_empty() {
                     next.err("Expected =");
@@ -433,16 +411,7 @@ impl TokenQueue {
         self.elements.extend(other.elements[other.pointer..].iter().cloned());
     }
 
-    // fn clone_static_mut(&self) -> &'static mut TokenQueue {
-    //     let mut newelements = Vec::<LexedToken>::new();
-    //
-    //     for token in &self.elements {
-    //         newelements.push(token.clone())
-    //     }
-    //
-    //     &mut TokenQueue {
-    //         elements: newelements,
-    //         pointer: self.pointer
-    //     }
-    // }
+    pub fn purge_all(&mut self, id: &'static str) {
+        self.elements.retain(|t| t.token_type().id().ne(id))
+    }
 }
