@@ -1,9 +1,9 @@
 use std::path::Path;
 use crate::lexer::{data, token, full_lex};
-use std::fs::{read_to_string, read};
+use std::fs::read_to_string;
 use crate::parser::parse;
-use crate::interpreter::{interpret, ExternalRuntimeFunction, RuntimeExpression};
-use std::panic::{catch_unwind, set_hook};
+use crate::interpreter::{interpret, runtime::ExternalRuntimeFunction};
+use std::panic::set_hook;
 use std::env;
 use std::time::{SystemTime, UNIX_EPOCH, Duration};
 use std::io::{stdin, Write};
@@ -11,11 +11,10 @@ use num_bigint::BigInt;
 use std::thread;
 use std::io::stdout;
 
-mod lexer;
-mod parser;
-mod ast;
-mod interpreter;
-mod expression_parser;
+pub mod ast;
+pub mod interpreter;
+pub mod lexer;
+pub mod parser;
 
 macro_rules! external {
     ($name: expr, $parameters: expr, $invoke: expr) => {
@@ -27,7 +26,7 @@ macro_rules! external {
     };
 }
 
-const DEV: bool = false;
+const DEV: bool = true;
 
 fn main() {
     if DEV {
@@ -220,7 +219,7 @@ fn fake_main(file: &Path) {
             |args, ast| {
                 print!("{}", args.get(0).unwrap().execute(ast));
 
-                stdout().flush(); // flush so it gets printed
+                stdout().flush().unwrap(); // flush so it gets printed
 
                 BigInt::from(0)
             }
@@ -245,7 +244,7 @@ fn fake_main(file: &Path) {
         external!( // input()
             "input",
             0,
-            |args, ast| {
+            |_, _| {
                 let mut input = String::new();
 
                 stdin().read_line(&mut input).ok().expect("Failed to read line");
@@ -271,7 +270,7 @@ fn fake_main(file: &Path) {
         external!( // newline()
             "newline",
             0,
-            |args, ast| {
+            |_, _| {
                 println!();
 
                 BigInt::from(0)
@@ -280,10 +279,10 @@ fn fake_main(file: &Path) {
         external!( // empty()
             "empty",
             0,
-            |args, ast| {
+            |_, _| {
                 print!(" ");
 
-                stdout().flush(); // flush so it gets printed
+                stdout().flush().unwrap(); // flush so it gets printed
 
                 BigInt::from(0)
             }

@@ -1,6 +1,6 @@
 [package]
 name = "math"
-version = "1.0.0"
+version = "1.1.1"
 authors = ["illuminator3 <48388251+illuminator3@users.noreply.github.com>"]
 edition = "2018"
 
