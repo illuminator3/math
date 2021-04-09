@@ -315,18 +315,19 @@ println(factorial(input()))
 | UPPER_SNAKE_CASE
 |===
 
-== Current issues
-
-* The lexer is really slow
-
 == Coming soon
 
-* Pointers (v1.2)
-* Compiling (v1.2)
-* Defining external functions (v1.3)
-* Libraries (global modifier) (v1.2)
-* Matrices (v1.2)
-* Function references & (v1.2)
+* Pointers
+* Compiling
+* Defining external functions
+* Libraries (global modifier)
+* Matrices
+* Function references &
+
+== Special thanks to
+
+* joeyjoejoe#7320 for helping me fix the lexer issue
+* the entire together java server for helping me develop the syntax and other stuff
 
 == License
 
