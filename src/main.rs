@@ -177,11 +177,6 @@ fn fake_main(file: &Path) {
             "^",
             false
         ),
-        // token(
-        //     "DOT",
-        //     ".",
-        //     false
-        // ), we probably don't need this for now
         token(
             "NUMBER",
             "([0-9_.]+)",
@@ -228,15 +223,9 @@ fn fake_main(file: &Path) {
             "if",
             3,
             |args, ast| {
-                // println!("IF {:?}", RuntimeExpression::expr_to_string(args.get(0).unwrap().orig()));
-
                 return if args.get(0).unwrap().execute(ast) == BigInt::from(1) {
-                    // println!("true");
-
                     args.get(1).unwrap().execute(ast)
                 } else {
-                    // println!("false");
-
                     args.get(2).unwrap().execute(ast)
                 }
             }
