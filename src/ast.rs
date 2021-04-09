@@ -1,11 +1,8 @@
-use std::collections::hash_map::Entry;
-use crate::expression_parser::PartExpression;
-use std::env::VarError::NotPresent;
-use std::process::exit;
 use num_bigint::BigInt;
+use crate::parser::expression::PartExpression;
 
 #[derive(Debug)]
-pub struct AST { // AST = Abstract Syntax Tree
+pub struct AST {
     pub functions: Vec<Function>,
     pub variables: Vec<Variable>,
     pub loose_expressions: Vec<Expression>
@@ -33,10 +30,7 @@ pub struct Variable {
 #[derive(Debug, Eq, PartialEq)]
 pub enum Expression {
     None, // for parsing
-    External/* {*/  // for external functions
-        /*function: String,
-        arguments: Vec<Expression>
-    }*/,
+    External, // external functions
     NumberValue {
         value: BigInt
     },

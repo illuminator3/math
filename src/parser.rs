@@ -1,9 +1,9 @@
-use crate::lexer::{LexedToken, Token};
 use crate::ast::{AST, Function, Variable, Expression};
-use crate::expression_parser::{parse_expression, PartExpression, parse_expression_part, Precedence, actual_parse_expression};
-use std::borrow::Borrow;
-use std::any::Any;
-use crate::interpreter::ExternalRuntimeFunction;
+use crate::parser::expression::{PartExpression, actual_parse_expression, Precedence, parse_expression_part};
+use crate::lexer::LexedToken;
+use crate::interpreter::runtime::ExternalRuntimeFunction;
+
+pub mod expression;
 
 pub fn parse(tokens: Vec<LexedToken>, external_functions: Vec<ExternalRuntimeFunction>) -> AST {
     let mut queue = token_queue(tokens);
@@ -58,7 +58,6 @@ pub fn parse(tokens: Vec<LexedToken>, external_functions: Vec<ExternalRuntimeFun
     AST {
         functions,
         variables,
-        // loose_expressions: loose_expressions_pre.iter().map(|expr| actual_parse_expression(expr.clone(), &variables)).collect()
         loose_expressions
     }
 }
@@ -87,7 +86,7 @@ fn pre_parse_loose_expression(queue: &mut TokenQueue) -> PartExpression {
         }
     }
 
-    if actual_tokens.is_empty() { // probably a comment; still buggy
+    if actual_tokens.is_empty() { // probably a comment
         return PartExpression::Comment;
     }
 
@@ -110,7 +109,7 @@ fn post_parse_variable(var: &mut Variable, variables: &Vec<Variable>, functions:
 fn pre_parse_variable(queue: &mut TokenQueue) -> Variable {
     let mut name = String::new();
     let mut definition = PartExpression::None;
-    let mut wherepart = Vec::<PartExpression>::new();
+    let /* mut */ wherepart = Vec::<PartExpression>::new();
     let mut lines_left = 1;
 
     while lines_left > 0 && queue.is_not_empty() {
@@ -231,7 +230,7 @@ fn pre_parse_function(queue: &mut TokenQueue) -> Function {
         match next.token_type().id() {
             "PIPE" => lines_left += 1,
             "NEW_LINE" => lines_left -= 1,
-            "OPEN_PARENTHESIS" => { // I finally spelled this correctly *yay*
+            "OPEN_PARENTHESIS" => {
                 if name.is_empty() {
                     next.err("Expected identifier");
                 } else if PartExpression::None != definition {
@@ -266,7 +265,7 @@ fn pre_parse_function(queue: &mut TokenQueue) -> Function {
                 let mut expr_queue = token_queue(expr_queue_vec);
                 let mut first = true;
 
-                while expr_queue.is_not_empty() { // maybe also loop here
+                while expr_queue.is_not_empty() {
                     let next = expr_queue.peek();
                     let token = next.token_type().id().to_owned();
 
@@ -368,9 +367,6 @@ pub struct TokenQueue {
 }
 
 impl TokenQueue {
-    ///
-    /// get and remove
-    ///
     pub fn peek(&mut self) -> LexedToken {
         let get = self.get().clone();
 

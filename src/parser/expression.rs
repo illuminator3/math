@@ -2,9 +2,7 @@ use crate::ast::{Expression, Variable, MathType, Function};
 use crate::parser::{TokenQueue, token_queue};
 use crate::lexer::{LexedToken, Token};
 use std::collections::HashMap;
-use std::any::Any;
-use std::fmt::{Debug, Formatter};
-use crate::expression_parser::Precedence::Prefix;
+use std::fmt::Debug;
 use num_bigint::BigInt;
 
 pub fn parse_expression(queue: &mut TokenQueue, variables: &Vec<Variable>, functions: &Vec<Function>) -> Expression {
@@ -43,12 +41,10 @@ pub fn parse_expression_part(queue: &mut TokenQueue, precedence: Precedence) -> 
 
 enum Parser {
     Infix {
-        token: Token,
         runner: fn(&mut TokenQueue, PartExpression, LexedToken, Precedence) -> PartExpression,
         precedence: Precedence
     },
     Prefix {
-        token: Token,
         runner: fn(&mut TokenQueue, LexedToken) -> PartExpression
     }
 }
@@ -74,12 +70,6 @@ impl Parser {
             Parser::Infix { .. } => panic!("Not supported")
         }
     }
-
-    fn token(&self) -> &Token {
-        match self.clone() {
-            Parser::Infix { token, .. } | Parser::Prefix { token, .. } => token,
-        }
-    }
 }
 
 fn default_parse_infix(queue: &mut TokenQueue, left: PartExpression, token: LexedToken, precedence: Precedence) -> PartExpression {
@@ -94,28 +84,23 @@ fn default_parse_infix(queue: &mut TokenQueue, left: PartExpression, token: Lexe
 fn infix_parser(token: Token) -> Parser {
     match token.id() {
         "PLUS" | "MINUS" => Parser::Infix {
-            token,
             runner: default_parse_infix,
             precedence: Precedence::Sum
         },
         "MULTIPLY" | "DIVIDE" | "POW" => Parser::Infix {
-            token,
             runner: default_parse_infix,
             precedence: Precedence::Product
         },
         "EQUALS" | "NOT_EQUALS" | "BIGGER_OR_EQUALS" | "BIGGER" | "SMALLER_OR_EQUALS" => Parser::Infix {
-            token,
             runner: default_parse_infix,
             precedence: Precedence::Conditional
         },
         "ASSIGN" => Parser::Infix {
-            token,
             runner: default_parse_infix,
             precedence: Precedence::Assignment
         },
-        "OPEN_PARENTHESIS" => Parser::Infix { // I literally hate myself. I made so much typos initally writing this.... (I wrote "OPEN_PARANTHESIS") THIS TOOK ME 1 F*CKING HOUR TO DEBUG
-            token,
-            runner: |queue, left, token, precedence| -> PartExpression {
+        "OPEN_PARENTHESIS" => Parser::Infix {
+            runner: |queue, left, token, _| -> PartExpression {
                 match left {
                     PartExpression::Identifier { .. } => {},
                     _ => token.err("Identifier expected")
@@ -124,7 +109,7 @@ fn infix_parser(token: Token) -> Parser {
                 let mut arguments = Vec::<PartExpression>::new();
                 let mut first = true;
 
-                while queue.is_not_empty() { // maybe also loop here
+                while queue.is_not_empty() {
                     let next = queue.peek();
 
                     if first {
@@ -154,8 +139,7 @@ fn infix_parser(token: Token) -> Parser {
             precedence: Precedence::FunctionInvocation
         },
         _ => Parser::Infix {
-            token,
-            runner: |queue, left, token, precedence | -> PartExpression {
+            runner: |_, _, token, _ | -> PartExpression {
                 token.err(&format!("Unknown infix ('{}')", token.token_type().id()))
             },
             precedence: Precedence::None
@@ -165,7 +149,6 @@ fn infix_parser(token: Token) -> Parser {
 
 fn prefix_parser(token: Token) -> Parser {
     Parser::Prefix {
-        token: token.clone(),
         runner: match token.id() {
             "MINUS" => |queue, t| -> PartExpression {
                 PartExpression::PrefixOperator {
@@ -174,36 +157,24 @@ fn prefix_parser(token: Token) -> Parser {
                     token: t
                 }
             },
-            "NUMBER" => |queue, t| -> PartExpression {
+            "NUMBER" => |_, t| -> PartExpression {
                 PartExpression::Number {
                     val: t.content().parse::<BigInt>().unwrap(),
                     token: t
                 }
             },
-            "IDENTIFIER" => |queue, t| -> PartExpression {
+            "IDENTIFIER" => |_, t| -> PartExpression {
                 PartExpression::Identifier {
                     val: t.content().to_owned(),
                     token: t
                 }
             },
             "OPEN_PARENTHESIS" => |queue, t| -> PartExpression {
-                // let expr = parse_expression_part(queue, Precedence::None);
-                //
-                // // TODO not working :(
-                //
-                // let peek = queue.peek();
-                //
-                // println!("{}", &peek.token_type().id());
-                //
-                // peek.check_id("CLOSE_PARENTHESIS", "Expected close paranthesis".to_owned());
-                //
-                // expr
-
                 let mut expr_queue_vec = Vec::<LexedToken>::new();
                 let mut paras = 1;
 
                 while queue.is_not_empty() {
-                    let next = queue.peek(); // maybe change to #get
+                    let next = queue.peek();
                     let id = next.token_type().id();
 
                     if id.eq("OPEN_PARENTHESIS") {
@@ -215,8 +186,6 @@ fn prefix_parser(token: Token) -> Parser {
                     if paras < 0 {
                         next.err("Too many OPEN_PARENTHESIS");
                     } else if paras == 0 {
-                        // queue.remove();
-
                         if expr_queue_vec.is_empty() {
                             next.err("Empty block");
                         }
@@ -240,7 +209,7 @@ fn prefix_parser(token: Token) -> Parser {
 
 pub fn actual_parse_expression(expr: PartExpression, variables: &Vec<Variable>, functions: &Vec<Function>) -> Expression {
     return match expr {
-        PartExpression::Number { val, token } => {
+        PartExpression::Number { val, .. } => {
             Expression::NumberValue {
                 value: BigInt::from(val)
             }
@@ -259,8 +228,6 @@ pub fn actual_parse_expression(expr: PartExpression, variables: &Vec<Variable>, 
                 "-" => {
                     let expression = actual_parse_expression(*expression.clone(), &variables.clone(), &functions.clone());
 
-                    // match expression {
-                    //     Expression::NumberValue { .. } => {
                     Expression::Math {
                         var1: Box::new(expression.clone()),
                         var2: Box::new(Expression::Math {
@@ -272,9 +239,6 @@ pub fn actual_parse_expression(expr: PartExpression, variables: &Vec<Variable>, 
                         }),
                         math: MathType::Subtract
                     }
-                        // }
-                        // _ => token.err(&format!("Can't apply {} prefix to this", prefix))
-                    // }
                 }
                 _ => token.err("Unknown prefix")
             }
@@ -311,7 +275,7 @@ pub fn actual_parse_expression(expr: PartExpression, variables: &Vec<Variable>, 
                 _ => token.err("Unknown infix")
             }
         },
-        PartExpression::FunctionInvocation { val, arguments, token } => {
+        PartExpression::FunctionInvocation { val, arguments, .. } => {
             let name = match *val.clone() {
                 PartExpression::Identifier { val, .. } => val,
                 _ => panic!("Internal error")
@@ -334,7 +298,7 @@ pub fn actual_parse_expression(expr: PartExpression, variables: &Vec<Variable>, 
 #[derive(PartialEq, Debug)]
 pub enum PartExpression {
     None, // for parsing
-    Comment, // for loose expression parsing to work
+    Comment,
     Number {
         val: BigInt,
         token: LexedToken
@@ -458,16 +422,12 @@ impl Precedence {
             self.order() - 1
         };
 
-        // &self.entries().get(&order_less).expect("hmmmmmmmmmmmmmmmmmm")
-
         let entries = self.entries();
         let entry = entries.get(&order_less).expect("hmmmmmmmmmmmmmmm");
 
         entry.clone()
     }
 
-    // hmmmmmmmmmmmmmmmmmm
-    // why do we need this
     fn clone(&self) -> Precedence {
         match *self {
             Precedence::None => Precedence::None,

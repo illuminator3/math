@@ -1,9 +1,9 @@
 use crate::ast::{AST, Expression, MathType, Function, Variable};
-use std::env::var;
 use num_bigint::BigInt;
 use std::ops::{Add, Sub, Mul, Div};
-use std::collections::HashMap;
-use std::ptr::eq;
+use crate::interpreter::runtime::{RuntimeAST, RuntimeExpression, Tuple, RuntimeFunction, RuntimeVariable, ExternalRuntimeFunction};
+
+pub mod runtime;
 
 pub fn interpret(ast: AST, external_functions: Vec<ExternalRuntimeFunction>) {
     let exprs = ast.loose_expressions.clone().into_iter().map(RuntimeExpression::from).collect::<Vec<RuntimeExpression>>();
@@ -12,13 +12,6 @@ pub fn interpret(ast: AST, external_functions: Vec<ExternalRuntimeFunction>) {
     for expr in exprs {
         expr.execute(&mut runtime);
     }
-}
-
-#[derive(Clone)]
-pub struct RuntimeAST {
-    variables: Vec<RuntimeVariable>,
-    functions: Vec<RuntimeFunction>,
-    external_functions: Vec<ExternalRuntimeFunction>
 }
 
 impl RuntimeAST {
@@ -127,13 +120,6 @@ impl RuntimeAST {
     }
 }
 
-#[derive(Clone)]
-pub struct ExternalRuntimeFunction {
-    name: String,
-    parameters: usize,
-    invoke: fn(Vec<RuntimeExpression>, &mut RuntimeAST) -> BigInt
-}
-
 impl ExternalRuntimeFunction {
     pub fn create(name: &'static str, parameters: usize, invoke: fn(Vec<RuntimeExpression>, &mut RuntimeAST) -> BigInt) -> ExternalRuntimeFunction {
         ExternalRuntimeFunction {
@@ -156,13 +142,6 @@ impl ExternalRuntimeFunction {
     }
 }
 
-#[derive(Clone)]
-pub struct RuntimeVariable {
-    name: String,
-    definition: RuntimeExpression,
-    function_argument: bool
-}
-
 impl RuntimeVariable {
     pub fn from(orig: Variable) -> Self {
         RuntimeVariable {
@@ -176,22 +155,6 @@ impl RuntimeVariable {
         self.definition.execute(ast)
     }
 }
-
-#[derive(Clone)]
-pub struct RuntimeFunction {
-    name: String,
-    definition: RuntimeExpression,
-    parameters: Vec<String>,
-    cached: bool,
-    cache: Vec<Tuple<Vec<BigInt>, BigInt>>
-}
-
-#[derive(Clone, Debug)]
-struct Tuple<A: PartialEq, B: PartialEq> {
-    a: A,
-    b: B
-}
-
 impl<A: PartialEq, B: PartialEq> PartialEq for Tuple<A, B> {
     fn eq(&self, other: &Self) -> bool {
         self.a == other.a && self.b == other.b
@@ -214,31 +177,6 @@ impl RuntimeFunction {
     }
 
     pub fn invoke(&mut self, args: Vec<BigInt>, ast: &mut RuntimeAST) -> BigInt {
-        // return if self.cached {
-        //     println!("cached");
-        //
-        //     let key = &*args;
-        //
-        //     println!("key {:?}", key);
-        //
-        //     if self.cache.contains_key(key) {
-        //         println!("contains_key");
-        //
-        //         self.cache.get(key).unwrap().clone()
-        //     } else {
-        //         println!("recache");
-        //
-        //         let result = self.definition.execute(RuntimeAST::function_ast(ast.clone(), self.clone(), args.clone()));
-        //
-        //         println!("result {:?}", result);
-        //
-        //         self.cache.insert(args.clone(), result.clone());
-        //
-        //         result
-        //     }
-        // } else {
-        //     self.definition.execute(RuntimeAST::function_ast(ast.clone(), self.clone(), args))
-        // }
         return if self.cached {
             let mut found = None;
 
@@ -281,11 +219,6 @@ impl RuntimeFunction {
     }
 }
 
-#[derive(Clone, Debug)]
-pub struct RuntimeExpression {
-    orig: Expression
-}
-
 impl RuntimeExpression {
     pub fn from(orig: Expression) -> Self {
         RuntimeExpression {
@@ -302,8 +235,6 @@ impl RuntimeExpression {
     }
 
     pub fn execute_expr(expr: &Expression, ast: &mut RuntimeAST) -> BigInt {
-        // println!("execute_expr {:?}", RuntimeExpression::expr_to_string(&expr));
-
         match expr {
             Expression::NumberValue { value } => value.clone(),
             Expression::VariableAccess { variable } => ast.lookup_variable(&variable.to_owned()).get_value(ast),
@@ -313,8 +244,6 @@ impl RuntimeExpression {
                 let val = RuntimeExpression::from(*value.clone()).execute(ast);
 
                 ast.reassign_variable(ast.lookup_variable(&variable.to_owned()), val)
-
-                // ast.reassign_variable(ast.lookup_variable(&variable.to_owned()), RuntimeExpression::from(*value.clone()).execute(ast));
             },
             Expression::None | Expression::External => panic!("Can not execute Expression::None | Expression::External")
         }
@@ -344,8 +273,7 @@ impl RuntimeExpression {
             Expression::VariableAccess { variable } => variable.to_owned(),
             Expression::Math { var1, var2, math } => format!("({}) {} ({})", RuntimeExpression::expr_to_string(var1), math.operator(), RuntimeExpression::expr_to_string(var2)),
             Expression::FunctionInvocation { function, arguments } => format!("{}({})", function, arguments.into_iter().map(|expr| RuntimeExpression::expr_to_string(expr)).collect::<Vec<String>>().join(", ")),
-            Expression::VariableAssignment { variable, value } => format!("{} = {}", variable, RuntimeExpression::expr_to_string(value)),
-            _ => "".to_owned()
+            Expression::VariableAssignment { variable, value } => format!("{} = {}", variable, RuntimeExpression::expr_to_string(value))
         }
     }
 }
