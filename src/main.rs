@@ -26,7 +26,7 @@ macro_rules! external {
     };
 }
 
-const DEV: bool = true;
+const DEV: bool = false;
 
 fn main() {
     if DEV {
