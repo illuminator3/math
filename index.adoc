@@ -315,15 +315,6 @@ println(factorial(input()))
 | UPPER_SNAKE_CASE
 |===
 
-== Coming soon
-
-* Pointers
-* Compiling
-* Defining external functions
-* Libraries (global modifier)
-* Matrices
-* Function references &
-
 == Special thanks to
 
 * joeyjoejoe#7320 for helping me fix the lexer issue
