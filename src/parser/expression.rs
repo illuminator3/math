@@ -150,7 +150,7 @@ fn infix_parser(token: Token) -> Parser {
 fn prefix_parser(token: Token) -> Parser {
     Parser::Prefix {
         runner: match token.id() {
-            "MINUS" => |queue, t| -> PartExpression {
+            "MINUS" | "MULTIPLY" => |queue, t| -> PartExpression {
                 PartExpression::PrefixOperator {
                     prefix: t.content().to_owned(),
                     expression: Box::new(parse_expression_part(queue, Precedence::Prefix)),
@@ -240,6 +240,19 @@ pub fn actual_parse_expression(expr: PartExpression, variables: &Vec<Variable>, 
                         math: MathType::Subtract
                     }
                 }
+                "*" => {
+                    let expression = actual_parse_expression(*expression.clone(), &variables.clone(), &functions.clone());
+                    let var;
+
+                    match expression {
+                        Expression::VariableAccess { variable } => var = variable,
+                        _ => token.err("Expected variable access on the left")
+                    }
+
+                    Expression::Pointer {
+                        to: var
+                    }
+                },
                 _ => token.err("Unknown prefix")
             }
         },
@@ -384,12 +397,12 @@ impl PartExpression {
 #[derive(Debug)]
 pub enum Precedence {
     None,
+    Assignment,
     Conditional,
     Sum,
     Product,
     FunctionInvocation,
-    Prefix,
-    Assignment
+    Prefix
 }
 
 impl Precedence {
@@ -406,12 +419,12 @@ impl Precedence {
     fn order(&self) -> u8 {
         match *self {
             Precedence::None => 0,
-            Precedence::Conditional => 1,
-            Precedence::Sum => 2,
-            Precedence::Product => 3,
-            Precedence::FunctionInvocation => 4,
-            Precedence::Prefix => 5,
-            Precedence::Assignment => 6
+            Precedence::Assignment => 1,
+            Precedence::Conditional => 2,
+            Precedence::Sum => 3,
+            Precedence::Product => 4,
+            Precedence::FunctionInvocation => 5,
+            Precedence::Prefix => 6
         }
     }
 

@@ -15,7 +15,7 @@ pub struct ExternalRuntimeFunction {
     pub invoke: fn(Vec<RuntimeExpression>, &mut RuntimeAST) -> BigInt
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct RuntimeVariable {
     pub name: String,
     pub definition: RuntimeExpression,
@@ -28,7 +28,7 @@ pub struct RuntimeFunction {
     pub definition: RuntimeExpression,
     pub parameters: Vec<String>,
     pub cached: bool,
-    pub cache: Vec<Tuple<Vec<BigInt>, BigInt>>
+    pub cache: Vec<Tuple<Vec<RuntimeExpression>, BigInt>>
 }
 
 #[derive(Clone, Debug)]
@@ -39,5 +39,7 @@ pub struct Tuple<A: PartialEq, B: PartialEq> {
 
 #[derive(Clone, Debug)]
 pub struct RuntimeExpression {
-    pub orig: Expression
+    pub orig: Expression,
+    pub is_pointer: bool,
+    pub pointer_to: Box<Option<RuntimeVariable>>
 }

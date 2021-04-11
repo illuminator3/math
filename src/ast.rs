@@ -1,7 +1,7 @@
 use num_bigint::BigInt;
 use crate::parser::expression::PartExpression;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct AST {
     pub functions: Vec<Function>,
     pub variables: Vec<Variable>,
@@ -49,6 +49,9 @@ pub enum Expression {
     VariableAssignment {
         variable: String,
         value: Box<Expression>
+    },
+    Pointer {
+        to: String
     }
 }
 
@@ -62,6 +65,7 @@ impl Clone for Expression {
             Expression::Math { var1, var2, math } => Expression::Math { var1: var1.to_owned(), var2: var2.to_owned(), math: math.clone() },
             Expression::FunctionInvocation { function, arguments } => Expression::FunctionInvocation { function: function.to_owned(), arguments: arguments.clone() },
             Expression::VariableAssignment { variable, value } => Expression::VariableAssignment { variable: variable.to_owned(), value: value.to_owned() },
+            Expression::Pointer { to } => Expression::Pointer { to: to.clone() }
         }
     }
 }

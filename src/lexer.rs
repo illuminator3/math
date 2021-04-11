@@ -168,7 +168,7 @@ impl Token {
 pub fn read_lines(comment: String, content: String, file: String) -> Vec<Line> {
     content.lines().enumerate().map(|(i, s)| {
         Line {
-            content: s.split(&comment).next().unwrap().to_owned(),
+            content: s.split(&comment).next().unwrap().to_owned().replace("\t", "    "),
             line: i,
             file: file.clone()
         }
