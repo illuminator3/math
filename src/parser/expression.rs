@@ -18,11 +18,7 @@ pub fn parse_expression_part(queue: &mut TokenQueue, precedence: Precedence) -> 
     let prefix_parser = prefix_parser(next.token_type().clone());
     let mut left = prefix_parser.runner_prefix()(queue, next);
 
-    loop {
-        if queue.is_empty() {
-            break;
-        }
-
+    while queue.is_not_empty() {
         next = queue.get().clone();
 
         let infix_parser = infix_parser(next.token_type().clone());
